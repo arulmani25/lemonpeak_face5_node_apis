@@ -25,8 +25,8 @@ const MultiDBConnection = {
             resolve([productDBCheck]);
         })
             .then(() => {
-                Express.listen('2025', () => {
-                    console.log('server is running in 2025');
+                Express.listen('3000', () => {
+                    console.log('server is running in 3000');
                 });
             })
             .catch((error) => {
