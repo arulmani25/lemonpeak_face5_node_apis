@@ -293,7 +293,7 @@ const generatePdf = async (payload) => {
         });
 
         // Fetch and embed the signature image
-        const signImageUrl = 'http://18.61.82.213:3000/api/Face5_Logo2-2 text.png';
+        const signImageUrl = payload.sign_url;
         const signResponse = await fetch(signImageUrl);
         const signImageBytes = await signResponse.arrayBuffer();
         const signImage = await pdfDoc.embedPng(signImageBytes);
