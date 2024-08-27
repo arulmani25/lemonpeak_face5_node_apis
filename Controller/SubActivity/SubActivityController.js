@@ -4,15 +4,20 @@ const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
-const Activity = require('../Activity/ActivityModel');
-const SidebarItem = require('../Sidebar/SidebarModel');
-const Subactivity = require('../SubActivity/SubactivityModel');
-const CheckListModel = require('../Checklist/ChecklistModel');
+const Activity = require('../../Models/ActivityModel');
+const SidebarItem = require('../../Models/SidebarModel');
+const Subactivity = require('../../Models/SubactivityModel');
+const CheckListModel = require('../../Models/ChecklistModel');
 const ObjectId = mongoose.Types.ObjectId;
 
 // Create a new subactivity
-const SiteManagementController = {
-
+const SubActivityController = {
+    /**
+     * create SubActivity
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     create : async (req, res) => {
         try {
             if (!req.body.title || !req.body.description || !req.body.parentActivity) {
@@ -85,7 +90,12 @@ const SiteManagementController = {
             });
         }
     },
-
+    /**
+     * update sub_activity
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update : async (req, res) => {
         try {
             // Basic input validation
@@ -121,7 +131,11 @@ const SiteManagementController = {
             });
         }
     },
-
+    /**
+     * get sub_activity list
+     * @param {*} req 
+     * @param {*} res 
+     */
     List : async (req, res) => {
         try {
             const subactivities = await Subactivity.aggregate([
@@ -166,7 +180,12 @@ const SiteManagementController = {
             });
         }
     },
-
+    /**
+     * get sub_activity details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const subactivity = await Subactivity.findById(req.params.id);
@@ -193,7 +212,12 @@ const SiteManagementController = {
             });
         }
     },
-
+    /**
+     * delete sub_activity details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Delete : async (req, res) => {
         try {
             const deletedSubactivity = await Subactivity.findByIdAndDelete(req.params.id);
@@ -222,4 +246,4 @@ const SiteManagementController = {
     }
 };
 
-module.exports = SiteManagementController;
+module.exports = SubActivityController;

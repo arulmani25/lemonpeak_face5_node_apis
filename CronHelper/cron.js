@@ -1,4 +1,4 @@
-const jobManagement = require('../Controller/JobManagement/JobManagementModel');
+const jobManagement = require('../Models/JobManagementModel');
 const cron = require('node-cron');
 const moment = require('moment');
 

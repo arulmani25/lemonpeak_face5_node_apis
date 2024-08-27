@@ -6,7 +6,12 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 
 const FileUpload = {
-
+    /**
+     * file upload
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Upload : async (req, res) => {
         const payload = req.files;
         if (Object.keys(payload?.files).length == 0) {

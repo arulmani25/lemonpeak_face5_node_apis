@@ -3,12 +3,12 @@ const Router = Express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const ClientManagementLocal = './ClientManagementModel';
+const ClientManagementLocal = '../../Models/ClientManagementModel';
 const ClientManagementModel = require(ClientManagementLocal);
 
 const ClientManagement = {
     /**
-     * 
+     * create client
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -40,7 +40,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * list of client
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     List : async (req, res) => {
         try {
             const { searchKey, skip, limit, sortkey, sortOrder, status } = req.query;
@@ -88,7 +93,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * details of client
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const clientInfo = await ClientManagementModel.findById(req.params.id);
@@ -116,7 +126,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * update client
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update : async (req, res) => {
         try {
             const updateClient = await ClientManagementModel.findByIdAndUpdate(req.body.id, req.body, {
@@ -145,7 +160,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * update client details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     UpdateStatus : async (req, res) => {
         try {
             // Basic input validation
@@ -179,7 +199,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * linksite
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     LinkSite : async (req, res) => {
         try {
             // Basic input validation
@@ -213,7 +238,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * unlink site
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     UnlinkSite : async (req, res) => {
         try {
             // Basic input validation
@@ -247,7 +277,12 @@ const ClientManagement = {
             });
         }
     },
-
+    /**
+     * delete_client_management
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     DeleteClientManagement : async (req, res) => {
         try {
             const removeClient = await ClientManagementModel.findByIdAndDelete(req.params.id);

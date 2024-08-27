@@ -6,15 +6,18 @@ Router.use(bodyParser.json());
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const moment = require('moment');
-const JobManagementModel = require('./JobManagementModel');
+const JobManagementModel = require('../../Models/JobManagementModel');
 const { jobStatus } = require('../../Helpers');
-const JobLocationTracking = require('./JobLocationTrackingModel');
-const UserLocal = '../AccessConfig/AccessConfigModel';
-const User = require(UserLocal);
+const JobLocationTracking = require('../../Models/JobLocationTrackingModel');
 const { generatePdf } = require('../../Helpers/pdfGenerates');
 
 const JobManagementController = {
-
+    /**
+     * create jobmanagement
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     create : async (req, res) => {
         try {
             if (!req.body.siteId || !req?.body?.activityId) {
@@ -50,7 +53,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * get all jobmanagement list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     List : async (req, res) => {
         try {
             const {
@@ -176,7 +184,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * get job_management details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const job = await JobManagementModel.findById(req.params.id);
@@ -204,24 +217,15 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * update job_management  details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update : async (req, res) => {
         try {
-            // Basic input validation
-            // if (
-            //   !req.body.activityId ||
-            //   !req.body.subActivityId ||
-            //   !req.body.checklistId
-            // ) {
-            //   return res.status(400).json({
-            //     Status: "Failed",
-            //     Message:
-            //       "ActivityId, SubactivityId, and ChecklistId are required fields",
-            //     Data: {},
-            //     Code: 400,
-            //   });
-            // }
-    
+
             const job = await JobManagementModel.findByIdAndUpdate(req.body.id, req.body, {
                 new: true
             });
@@ -248,7 +252,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * update job status
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     UpdateStatus : async (req, res) => {
         try {
             let createJob;
@@ -282,7 +291,7 @@ const JobManagementController = {
             // jobStatusUpdate.jobStatus = req.body.jobStatus;
             // delete jobStatusUpdate._id;
     
-            createJob = await JobManagementModel.create({ ...jobStatusUpdate });
+            // createJob = await JobManagementModel.create({ ...jobStatusUpdate });
     
             createLocationTracking = await JobLocationTracking.create({
                 jobId: job?.jobId,
@@ -309,7 +318,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * delete job
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     DeleteJobManagement : async (req, res) => {
         try {
             const deletedJob = await JobManagementModel.findByIdAndDelete(req.params.id);
@@ -336,7 +350,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * track_employee_details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     TrackEmployee : async (req, res) => {
         try {
             const startDate = moment(req.query.fromDate);
@@ -382,7 +401,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * jobmanagement dashboard
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Dashboard : async (req, res) => {
         try {
             // Basic input validation
@@ -458,7 +482,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * geaph details in jobmanagement list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Graphdata : async (req, res) => {
         try {
             const fromDate = req.body.fromDate;
@@ -714,7 +743,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * generate_pdf
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Generatepdf : async (req, res) => {
         try {
             const pdfFilename = await generatePdf(req?.body);
@@ -741,7 +775,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * job list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     MobileJoblist : async (req, res) => {
         try {
             const jobList = await JobManagementModel.aggregate([

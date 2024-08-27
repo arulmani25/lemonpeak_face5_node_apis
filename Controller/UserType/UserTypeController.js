@@ -3,11 +3,16 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const User = require('../Users/UserModel');
-const UserType = require('./UserTypeModel');
+const User = require('../../Models/UserModel');
+const UserType = require('../../Models/UserTypeModel');
 
 const UserTypeController = {
-
+    /**
+     * create usertype
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     create : async (req, res) => {
         try {
             if (!req.body.name || !req.body.code) {
@@ -46,7 +51,12 @@ const UserTypeController = {
             });
         }
     },
-
+    /**
+     * list of usertype
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     List : async (req, res) => {
         try {
             const userTypes = await UserType.find();
@@ -66,7 +76,12 @@ const UserTypeController = {
             });
         }
     },
-
+    /**
+     * details of usertype
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const userType = await UserType.findById(req.params.id);
@@ -94,7 +109,12 @@ const UserTypeController = {
             });
         }
     },
-
+    /**
+     * update usertype
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update: async (req, res) => {
         try {
             const updatedUserType = await UserType.findByIdAndUpdate(req.params.id, req.body, { new: true }); // Return updated document
@@ -122,7 +142,12 @@ const UserTypeController = {
             });
         }
     },
-
+    /**
+     * delete usertype
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Delete : async (req, res) => {
         try {
             const deletedUserType = await UserType.findByIdAndDelete(req.params.id);

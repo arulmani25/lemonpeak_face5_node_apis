@@ -3,10 +3,14 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const subAdminAccessModel = require('../Subadminaccess/SubAdminAccessModel');
+const subAdminAccessModel = require('../../Models/SubAdminAccessModel');
 
 const SubAdminAccessController = {
-
+    /**
+     * create sub_admin
+     * @param {*} req 
+     * @param {*} res 
+     */
     create : async function (req, res) {
         const isExist = await subAdminAccessModel.findOne({
             user_name: req.body.user_name
@@ -53,7 +57,11 @@ const SubAdminAccessController = {
             });
         }
     },
-
+    /**
+     * get sub_admin details
+     * @param {*} req 
+     * @param {*} res 
+     */
     Details : async (req, res) => {
         await subAdminAccessModel.findOne({ _id: req.body._id }, function (err, StateList) {
             res.json({
@@ -64,7 +72,11 @@ const SubAdminAccessController = {
             });
         });
     },
-
+    /**
+     * login sub_admin
+     * @param {*} req 
+     * @param {*} res 
+     */
     Login : async (req, res) => {
         await subAdminAccessModel.findOne({ username: req.body.username, password: req.body.password }, (err, data) => {
             if (data !== null) {
@@ -84,7 +96,11 @@ const SubAdminAccessController = {
             }
         });
     },
-
+    /**
+     * delete sub_admin details
+     * @param {*} req 
+     * @param {*} res 
+     */
     Deletes : function (req, res) {
         subAdminAccessModel.remove({}, function (err, user) {
             if (err) return res.status(500).send('There was a problem deleting the sub admin access.');
@@ -96,7 +112,11 @@ const SubAdminAccessController = {
             });
         });
     },
-
+    /**
+     * get all sub_admin details
+     * @param {*} req 
+     * @param {*} res 
+     */
     List : async (req, res) => {
         await subAdminAccessModel.find({}, (err, data) => {
             res.json({
@@ -107,7 +127,11 @@ const SubAdminAccessController = {
             });
         });
     },
-
+    /**
+     * update sub_admin details
+     * @param {*} req 
+     * @param {*} res 
+     */
     Update : async (req, res) => {
         await subAdminAccessModel.findByIdAndUpdate(req.body._id, req.body, { new: true }, (err, UpdatedDetails) => {
             if (err)
@@ -125,7 +149,11 @@ const SubAdminAccessController = {
             });
         });
     },
-
+    /**
+     * delete sub_admin
+     * @param {*} req 
+     * @param {*} res 
+     */
     Delete : async (req, res) => {
         await subAdminAccessModel.findByIdAndRemove(req.body._id, function (err, user) {
             if (err)

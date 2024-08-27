@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
-const User = require('./UserModel');
+const User = require('../../Models/UserModel');
 const ObjectId = mongoose.Types.ObjectId;
 const bcrypt = require('bcryptjs');
 const { GenerateToken } = require('../../Helpers');
@@ -17,7 +17,12 @@ function hashPassword(password) {
 }
 
 const UserController = {
-
+    /**
+     * create user
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     create : async (req, res) => {
         try {
             if (!req.body.username || !req.body.email || !req.body.password || !req.body.firstName || !req.body.lastName) {
@@ -52,7 +57,6 @@ const UserController = {
             }
             const hashedPassword = await hashPassword(req.body.password);
             req.body.password = hashedPassword;
-            console.log('========req.body.password', req.body.password);
             const newUser = await User.create(req.body);
             return res.status(200).json({
                 Status: 'Success',
@@ -70,7 +74,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * user list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     List : async (req, res) => {
         try {
             const users = await User.find().populate('userType');
@@ -90,7 +99,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * get user details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const user = await User.findById(req.params.id).populate('userType');
@@ -118,7 +132,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * update use details
+     * @param {update} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update : async (req, res) => {
         try {
             const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
@@ -153,7 +172,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * delete user
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Delete : async (req, res) => {
         try {
             const deletedUser = await User.findByIdAndDelete(req.params.id);
@@ -181,7 +205,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * login user
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Login : async (req, res) => {
         try {
             const user = await User.findOne({
@@ -230,7 +259,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * update user password
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     UpdatePassword : async (req, res) => {
         try {
             if (req.body.oldPassword === req.body.newPassword) {
@@ -284,7 +318,12 @@ const UserController = {
             });
         }
     },
-
+    /**
+     * forgot user password
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     ForgotPassword : async (req, res) => {
         try {
             const user = await User.findOne({

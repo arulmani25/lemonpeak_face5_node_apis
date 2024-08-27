@@ -5,9 +5,9 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const Activity = require('./ActivityModel');
-const SidebarItem = require('../Sidebar/SidebarModel');
-const CheckListModel = require('../Checklist/ChecklistModel');
+const Activity = require('../../Models/ActivityModel');
+const SidebarItem = require('../../Models/SidebarModel');
+const CheckListModel = require('../../Models/ChecklistModel');
 
 let ActivityController = {
     /**

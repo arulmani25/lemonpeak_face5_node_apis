@@ -5,11 +5,11 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const tempChecklistModel = require('../TempChecklist/TempChecklistModel');
+const tempChecklistModel = require('../../Models/TempChecklistModel');
 
 const TempChecklistController = {
     /**
-     * 
+     * create temp_checklist
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -54,7 +54,7 @@ const TempChecklistController = {
         }
     },
     /**
-     * 
+     * list of temp_checklist
      * @param {*} req 
      * @param {*} res 
      */
@@ -77,7 +77,7 @@ const TempChecklistController = {
         }
     },
     /**
-     * 
+     * details of temp_checklist
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -111,7 +111,7 @@ const TempChecklistController = {
         }
     },
     /**
-     * 
+     * update temp_checklistdetails
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -143,7 +143,7 @@ const TempChecklistController = {
         }
     },
     /**
-     * 
+     * delete temp_checklist
      * @param {*} req 
      * @param {*} res 
      * @returns 

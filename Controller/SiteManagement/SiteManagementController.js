@@ -5,11 +5,11 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const SiteManagementModel = require('./SiteManagementModel');
+const SiteManagementModel = require('../../Models/SiteManagementModel');
 
 const SiteManagementController = {
     /**
-     * 
+     * create sitemanagement
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -42,7 +42,7 @@ const SiteManagementController = {
         }
     },
     /**
-     * 
+     * get sitemanagement list
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -95,7 +95,7 @@ const SiteManagementController = {
         }
     },
     /**
-     * 
+     * get sitemanagement details
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -128,7 +128,7 @@ const SiteManagementController = {
         }
     },
     /**
-     * 
+     * delete sitemanagement details
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -160,7 +160,7 @@ const SiteManagementController = {
         }
     },
     /**
-     * 
+     * update sitemanagement details
      * @param {*} req 
      * @param {*} res 
      * @returns 

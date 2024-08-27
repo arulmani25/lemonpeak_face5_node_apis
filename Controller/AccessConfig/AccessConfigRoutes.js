@@ -27,5 +27,4 @@ Router.delete('/:id', (req, res) => {
     return deleteData(req, res);
 });
 
-
 module.exports = Router;

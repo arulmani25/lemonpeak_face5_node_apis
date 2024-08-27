@@ -5,16 +5,19 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
 
-const SidebarItem = require('./SidebarModel');
-const AccessConfigLocal = '../AccessConfig/AccessConfigModel';
-const AccessConfig = require(AccessConfigLocal);
-const UserType = require('../UserType/UserTypeModel');
+const SidebarModel = require('../../Models/SidebarModel');
+const AccessConfigModel = require('../../Models/AccessConfigModel');
+const UserTypeModel = require('../../Models/UserTypeModel');
 
 const SidebarController = {
-
+    /**
+     * create sidebar
+     * @param {*} req 
+     * @param {*} res 
+     */
     create : async (req, res) => {
         try {
-            const newSidebarItem = await SidebarItem.create(req.body);
+            const newSidebarItem = await SidebarModel.create(req.body);
             res.status(201).json({
                 Status: 'Success',
                 Message: 'Sidebar item created successfully',
@@ -31,13 +34,17 @@ const SidebarController = {
             });
         }
     },
-
+    /**
+     * get sidebar Details
+     * @param {*} req 
+     * @param {*} res 
+     */
     List : async (req, res) => {
         try {
-            const getIdByRole = await UserType.findOne({
+            const getIdByRole = await UserTypeModel.findOne({
                 name: req.loggedUser.user_type
             });
-            const getConfigs = await AccessConfig.findOne({
+            const getConfigs = await AccessConfigModel.findOne({
                 role: new mongoose.Types.ObjectId(getIdByRole._id)
             });
     
@@ -48,7 +55,7 @@ const SidebarController = {
                     sideBarItems.push(iterator.title);
                 }
             }
-            const sidebarItems = await SidebarItem.find({
+            const sidebarItems = await SidebarModel.find({
                 title: { $in: sideBarItems }
             });
             res.json({
@@ -66,10 +73,15 @@ const SidebarController = {
             });
         }
     },
-
+    /**
+     * SidebarItemsList
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     SidebarItemsList : async (req, res) => {
         try {
-            const sidebarItem = await SidebarItem.find();
+            const sidebarItem = await SidebarModel.find();
             if (!sidebarItem) {
                 return res.status(404).json({
                     Status: 'Failed',
@@ -93,10 +105,15 @@ const SidebarController = {
             });
         }
     },
-
+    /**
+     * get details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
-            const sidebarItem = await SidebarItem.findById(req.params.id);
+            const sidebarItem = await SidebarModel.findById(req.params.id);
             if (!sidebarItem) {
                 return res.status(404).json({
                     Status: 'Failed',
@@ -120,10 +137,15 @@ const SidebarController = {
             });
         }
     },
-
+    /**
+     * update sudebar details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update : async (req, res) => {
         try {
-            const updatedSidebarItem = await SidebarItem.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            const updatedSidebarItem = await SidebarModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!updatedSidebarItem) {
                 return res.status(404).json({
                     Status: 'Failed',
@@ -147,10 +169,15 @@ const SidebarController = {
             });
         }
     },
-
+    /**
+     * delete sidebar
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     DeleteSidebarItem : async (req, res) => {
         try {
-            const deletedSidebarItem = await SidebarItem.findByIdAndDelete(req.params.id);
+            const deletedSidebarItem = await SidebarModel.findByIdAndDelete(req.params.id);
             if (!deletedSidebarItem) {
                 return res.status(404).json({
                     Status: 'Failed',

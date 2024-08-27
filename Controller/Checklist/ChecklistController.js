@@ -5,7 +5,7 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const CheckListModel = require('./ChecklistModel');
+const CheckListModel = require('../../Models/ChecklistModel');
 
 const CheckList = {
     /**
@@ -45,7 +45,11 @@ const CheckList = {
             });
         }
     },
-
+    /**
+     * get all checklist
+     * @param {*} req 
+     * @param {*} res 
+     */
     List : async (req, res) => {
         try {
             const checkLists = await CheckListModel.find();
@@ -64,7 +68,12 @@ const CheckList = {
             });
         }
     },
-
+    /**
+     * find checklist details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const checklistById = await CheckListModel.aggregate([
@@ -103,7 +112,12 @@ const CheckList = {
             });
         }
     },
-
+    /**
+     * update checklist details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update: async (req, res) => {
         try {
             const updatedChecklist = await CheckListModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -130,7 +144,12 @@ const CheckList = {
             });
         }
     },
-
+    /**
+     * delete checklist details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     DeleteChecklist : async (req, res) => {
         try {
             const deleteChecklist = await CheckListModel.findByIdAndDelete(req.params.id);
@@ -157,7 +176,12 @@ const CheckList = {
             });
         }
     },
-
+    /**
+     * get checklist list in mobile
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     GetMobileChecklist : async (req, res) => {
         try {
             const checklistById = await CheckListModel.find({

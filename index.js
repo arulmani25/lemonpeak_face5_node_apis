@@ -28,7 +28,7 @@ app.use(responseMiddleware());
 
 app.use('/api/', express.static(path.join(__dirname)));
 
-require('./Controller/MultiConnection').establish(app);
+require('./Models/MultiConnection').establish(app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -316,7 +316,7 @@ app.use('/api/', express.static(path.join(__dirname, 'routes')));
 app.use('/api/', express.static(path.join(__dirname, 'Gad_Drawing')));
 app.use('/api/', express.static(path.join(__dirname, 'assets')));
 
-// ***--------------------------------------------------------------------------Face5 routes Start------------------------------------------------------------//
+// ***--------------------------------------------------------------------------Face5 routes start------------------------------------------------------------//
 
 app.use('/api/face5/accessconfig', require('./Controller/AccessConfig/AccessConfigRoutes'));
 app.use('/api/face5/activity', require('./Controller/Activity/ActicityRoutes'));

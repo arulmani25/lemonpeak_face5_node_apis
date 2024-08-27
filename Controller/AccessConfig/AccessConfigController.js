@@ -4,14 +4,14 @@ const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
-const UserTypeLocal = '../UserType/UserTypeModel';
+const UserTypeLocal = '../../Models/UserTypeModel';
 const UserType = require(UserTypeLocal);
-const AccessConfigLocal = '../AccessConfig/AccessConfigModel';
+const AccessConfigLocal = '../../Models/AccessConfigModel';
 const AccessConfig = require(AccessConfigLocal);
 
 const AccessConfiguration = {
     /**
-     * 
+     * create access configuration
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -49,7 +49,7 @@ const AccessConfiguration = {
         }
     },
     /**
-     * 
+     * get list_by_role
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -80,7 +80,7 @@ const AccessConfiguration = {
         }
     },
     /**
-     * 
+     * get access_config list
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -106,7 +106,7 @@ const AccessConfiguration = {
         }
     },
     /**
-     * 
+     * get access_config details
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -139,7 +139,7 @@ const AccessConfiguration = {
         }
     },
     /**
-     * 
+     * update access_config details
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -172,7 +172,7 @@ const AccessConfiguration = {
         }
     },
     /**
-     * 
+     * delete access config details
      * @param {*} req 
      * @param {*} res 
      * @returns 

@@ -5,12 +5,17 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const SubmittedChecklistModel = require('../SubmittedChecklist/SubmitChecklistModel');
-const jobManagementModel = require('../JobManagement/JobManagementModel');
+const SubmittedChecklistModel = require('../../Models/SubmitChecklistModel');
+const jobManagementModel = require('../../Models/JobManagementModel');
 const { jobStatus } = require('../../Helpers');
 
 const JobManagementController = {
-
+    /**
+     * create jobmanagement
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     create : async (req, res) => {
         try {
             const existingJob = await SubmittedChecklistModel.findOne({
@@ -46,7 +51,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * get jobmanagement list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     List : async (req, res) => {
         try {
             const submittedChecklist = await SubmittedChecklistModel.find({});
@@ -66,7 +76,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * get jobmanagement details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Details : async (req, res) => {
         try {
             const userType = await SubmittedChecklistModel.findById(req.params.id);
@@ -94,7 +109,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * update jobmanagement details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Update : async (req, res) => {
         try {
             const updatedUserType = await SubmittedChecklistModel.findByIdAndUpdate(req.params.id, req.body, { new: true }); // Return updated document
@@ -122,7 +142,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * delete jobmanagement
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Delete : async (req, res) => {
         try {
             const deletedCheklist = await SubmittedChecklistModel.findByIdAndDelete(req.params.id);
@@ -151,7 +176,12 @@ const JobManagementController = {
             });
         }
     },
-
+    /**
+     * check jobcompleted details
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     SubmittedjobList : async (req, res) => {
         try {
             const jobList = await jobManagementModel.find(

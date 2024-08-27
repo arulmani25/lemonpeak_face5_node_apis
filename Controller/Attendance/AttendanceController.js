@@ -4,10 +4,15 @@ const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const moment = require('moment');
-const Attendance = require('./AttendanceModel');
+const Attendance = require('../../Models/AttendanceModel');
 
 const AttendanceController = {
-    // Create a new activity
+    /**
+     * create attendance
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     createAttendance : async (req, res) => {
         try {
             if (!req.body.userPhoneNumber || !req.body.location || !req.body.lat || !req.body.lan) {
@@ -37,7 +42,12 @@ const AttendanceController = {
             });
         }
     },
-
+    /**
+     * get last_status
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     Getlaststatus : async (req, res) => {
         try {
             const startDate = moment();
@@ -65,7 +75,12 @@ const AttendanceController = {
             });
         }
     },
-
+    /**
+     * get attendance list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     List: async (req, res) => {
         try {
             const startDate = moment(req?.body?.fromDate);
@@ -149,7 +164,12 @@ const AttendanceController = {
             });
         }
     },
-
+    /**
+     * emp_list
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     EmpList : async (req, res) => {
         try {
             const startDate = moment(req?.body?.fromDate);

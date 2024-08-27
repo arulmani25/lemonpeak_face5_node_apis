@@ -2,9 +2,9 @@ const path = require('path');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs');
 const mongoose = require('mongoose');
-const SubmittedCheckListModel = require('../Controller/SubmittedChecklist/SubmitChecklistModel');
-const ActivityModel = require('../Controller/Activity/ActivityModel');
-const SiteManagementModel = require('../Controller/SiteManagement/SiteManagementModel');
+const SubmittedCheckListModel = require('../Models/SubmitChecklistModel');
+const ActivityModel = require('../Models/ActivityModel');
+const SiteManagementModel = require('../Models/SiteManagementModel');
 
 const generatePdf = async (payload) => {
     const spacing = 100; // Define spacing directly within the function
