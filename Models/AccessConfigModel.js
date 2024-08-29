@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const timestamps = require('mongoose-timestamp');
 
 const AccessConfigSchema = new mongoose.Schema({
+    access_config_id: { type: String },
     AccessConfig: { type: String },
     role: { type: mongoose.Types.ObjectId, ref: 'UserType' },
     sideBar: [

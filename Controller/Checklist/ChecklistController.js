@@ -10,11 +10,11 @@ const CheckListModel = require('../../Models/ChecklistModel');
 const CheckList = {
     /**
      * Create CheckList
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    createCheckList : async (req, res) => {
+    createCheckList: async (req, res) => {
         try {
             let Checklistdata = await CheckListModel.findOne({
                 $and: [{ main_activity_id: req?.body?.main_activity_id }, { index: req?.body?.index }]
@@ -47,10 +47,10 @@ const CheckList = {
     },
     /**
      * get all checklist
-     * @param {*} req 
-     * @param {*} res 
+     * @param {*} req
+     * @param {*} res
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const checkLists = await CheckListModel.find();
             res.json({
@@ -70,11 +70,11 @@ const CheckList = {
     },
     /**
      * find checklist details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const checklistById = await CheckListModel.aggregate([
                 {
@@ -114,9 +114,9 @@ const CheckList = {
     },
     /**
      * update checklist details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
     Update: async (req, res) => {
         try {
@@ -146,11 +146,11 @@ const CheckList = {
     },
     /**
      * delete checklist details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    DeleteChecklist : async (req, res) => {
+    DeleteChecklist: async (req, res) => {
         try {
             const deleteChecklist = await CheckListModel.findByIdAndDelete(req.params.id);
             if (!deleteChecklist) {
@@ -178,11 +178,11 @@ const CheckList = {
     },
     /**
      * get checklist list in mobile
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    GetMobileChecklist : async (req, res) => {
+    GetMobileChecklist: async (req, res) => {
         try {
             const checklistById = await CheckListModel.find({
                 $or: [

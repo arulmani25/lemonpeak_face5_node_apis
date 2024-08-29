@@ -10,11 +10,11 @@ const SiteManagementModel = require('../../Models/SiteManagementModel');
 const SiteManagementController = {
     /**
      * create sitemanagement
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             if (!req.body.clientId || !req.body.siteName) {
                 return res.status(400).json({
@@ -43,20 +43,20 @@ const SiteManagementController = {
     },
     /**
      * get sitemanagement list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const { searchKey, skip, limit, sortkey, sortOrder, clientId } = req.query;
-    
+
             const sort = {
                 [sortkey ? sortkey : 'createdAt']: !sortOrder || sortOrder === 'DESC' ? -1 : 1
             };
-    
+
             const searchRegex = new RegExp(['^.*', searchKey, '.*$'].join(''), 'i');
-    
+
             const siteList = await SiteManagementModel.aggregate([
                 {
                     $match: clientId ? { clientId: new ObjectId(clientId) } : {}
@@ -96,11 +96,11 @@ const SiteManagementController = {
     },
     /**
      * get sitemanagement details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const siteInfo = await SiteManagementModel.findById(req.params.id);
             if (!siteInfo) {
@@ -129,11 +129,11 @@ const SiteManagementController = {
     },
     /**
      * delete sitemanagement details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Delete : async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const removeSite = await SiteManagementModel.findByIdAndDelete(req.params.id);
             if (!removeSite) {
@@ -161,11 +161,11 @@ const SiteManagementController = {
     },
     /**
      * update sitemanagement details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
             const updateSite = await SiteManagementModel.findByIdAndUpdate(req.body.id, req.body, {
                 new: true
@@ -193,6 +193,6 @@ const SiteManagementController = {
             });
         }
     }
-}
+};
 
 module.exports = SiteManagementController;

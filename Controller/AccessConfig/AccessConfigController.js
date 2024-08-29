@@ -12,11 +12,11 @@ const AccessConfig = require(AccessConfigLocal);
 const AccessConfiguration = {
     /**
      * create access configuration
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             const existingAccess = await AccessConfig.findOne({
                 role: new mongoose.Types.ObjectId(req.body.role)
@@ -29,7 +29,6 @@ const AccessConfiguration = {
                     Code: 400
                 });
             }
-    
             const newAccess = await AccessConfig.create(req.body);
             const getRole = await UserType.findById(req.body.role);
             return res.status(200).json({
@@ -50,11 +49,11 @@ const AccessConfiguration = {
     },
     /**
      * get list_by_role
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    listbyrole : async (req, res) => {
+    listbyrole: async (req, res) => {
         try {
             const getIdByRole = await UserType.findOne({
                 name: req.loggedUser.user_type
@@ -62,7 +61,7 @@ const AccessConfiguration = {
             const getConfigs = await AccessConfig.findOne({
                 role: new mongoose.Types.ObjectId(getIdByRole._id)
             });
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Access Configuration Retrieved Successfully',
@@ -81,14 +80,14 @@ const AccessConfiguration = {
     },
     /**
      * get access_config list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    list : async (req, res) => {
+    list: async (req, res) => {
         try {
             const getConfigs = await AccessConfig.find({});
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Access Configuration Retrieved Successfully',
@@ -107,9 +106,9 @@ const AccessConfiguration = {
     },
     /**
      * get access_config details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
     Details: async (req, res) => {
         try {
@@ -140,11 +139,11 @@ const AccessConfiguration = {
     },
     /**
      * update access_config details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    update : async (req, res) => {
+    update: async (req, res) => {
         try {
             const updatedAccess = await AccessConfig.findByIdAndUpdate(req?.params?.id, req?.body, { new: true }); // Return updated document
             if (!updatedAccess) {
@@ -173,11 +172,11 @@ const AccessConfiguration = {
     },
     /**
      * delete access config details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    deleteData : async (req, res) => {
+    deleteData: async (req, res) => {
         try {
             const deletedConfig = await AccessConfig.findByIdAndDelete(req.params.id);
             if (!deletedConfig) {

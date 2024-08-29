@@ -1,6 +1,6 @@
 const Express = require('express');
 const Router = Express.Router();
-const {create, List, Details, Update, Delete, Login, UpdatePassword, ForgotPassword} = require('./UserController');
+const { create, List, Details, Update, Delete, Login, UpdatePassword, ForgotPassword } = require('./UserController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
 Router.post('/createUser', (req, res) => {
@@ -19,7 +19,7 @@ Router.put('/users/:id', VerifyToken, (req, res) => {
     return Update(req, res);
 });
 
-Router.delete("/users/:id", VerifyToken, (req, res) => {
+Router.delete('/users/:id', VerifyToken, (req, res) => {
     return Delete(req, res);
 });
 
@@ -35,6 +35,5 @@ Router.post('/updatepassword', VerifyToken, (req, res) => {
 Router.post('/forgotpassword', (req, res) => {
     return ForgotPassword(req, res);
 });
-
 
 module.exports = Router;

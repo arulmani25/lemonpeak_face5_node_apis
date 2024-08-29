@@ -1,6 +1,18 @@
 const Express = require('express');
 const Router = Express.Router();
-const {create, List, Details, Update, UpdateStatus, TrackEmployee, Dashboard, Graphdata, Generatepdf,MobileJoblist, DeleteJobManagement} = require('./JobManagementController');
+const {
+    create,
+    List,
+    Details,
+    Update,
+    UpdateStatus,
+    TrackEmployee,
+    Dashboard,
+    Graphdata,
+    Generatepdf,
+    MobileJoblist,
+    DeleteJobManagement
+} = require('./JobManagementController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
 Router.post('/create', VerifyToken, (req, res) => {
@@ -11,7 +23,7 @@ Router.get('/list', VerifyToken, (req, res) => {
     return List(req, res);
 });
 
-Router.get("/job/:id", VerifyToken, (req, res) => {
+Router.get('/job/:id', VerifyToken, (req, res) => {
     return Details(req, res);
 });
 
@@ -46,6 +58,5 @@ Router.post('/generatepdf', (req, res) => {
 Router.get('/mobile/joblist', VerifyToken, (req, res) => {
     return MobileJoblist(req, res);
 });
-
 
 module.exports = Router;

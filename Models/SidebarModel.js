@@ -19,6 +19,7 @@ const SubSidebarItemSchema = new mongoose.Schema({
 SubSidebarItemSchema.plugin(timestamps);
 
 const SidebarItemSchema = new mongoose.Schema({
+    sidebare_item_id: { type: String },
     sidebare_item: { type: String },
     title: {
         type: String,

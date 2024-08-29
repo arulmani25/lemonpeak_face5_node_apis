@@ -1,6 +1,13 @@
 const Express = require('express');
 const Router = Express.Router();
-const {createCheckList, List, Details, Update, DeleteChecklist, GetMobileChecklist} = require('./ChecklistController');
+const {
+    createCheckList,
+    List,
+    Details,
+    Update,
+    DeleteChecklist,
+    GetMobileChecklist
+} = require('./ChecklistController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
 Router.post('/create', VerifyToken, (req, res) => {

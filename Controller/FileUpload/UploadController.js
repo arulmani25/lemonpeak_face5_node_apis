@@ -8,16 +8,16 @@ Router.use(bodyParser.json());
 const FileUpload = {
     /**
      * file upload
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Upload : async (req, res) => {
+    Upload: async (req, res) => {
         const payload = req.files;
         if (Object.keys(payload?.files).length == 0) {
             return res.status(400).send('No files were uploaded.');
         }
-    
+
         const sampleFile = payload.files;
         const filePath = [];
         if (sampleFile.length > 1) {
@@ -44,6 +44,6 @@ const FileUpload = {
             Code: 200
         });
     }
-}
+};
 
 module.exports = FileUpload;

@@ -8,64 +8,75 @@ const ObjectId = mongoose.Types.ObjectId;
 const Activity = require('../../Models/ActivityModel');
 const SidebarItem = require('../../Models/SidebarModel');
 const CheckListModel = require('../../Models/ChecklistModel');
+const { getNanoId } = require('../../Helpers/Utils');
 
 let ActivityController = {
     /**
      * Create Activity
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    createActivity : async (req, res) => {
+    createActivity: async (req, res) => {
         try {
-          if (!req.body.title || !req.body.description || !req.body.index) {
-            return res.status(400).json({
-              Status: "Failed",
-              Message: "Title, description, and index are required fields",
-              Data: {},
-              Code: 400,
+            let requestData = req?.body;
+            if (!req?.body?.title || !req?.body?.description || !req?.body?.index) {
+                return res.status(400).json({
+                    Status: 'Failed',
+                    Message: 'Title, description, and index are required fields',
+                    Data: {},
+                    Code: 400
+                });
+            }
+            const existingActivity = await Activity.findOne({ index: req?.body?.index });
+            if (existingActivity) {
+                return res.status(409).json({
+                    Status: 'Failed',
+                    Message: 'Duplicate index found. Please choose a unique index.',
+                    Data: {},
+                    Code: 409
+                });
+            }
+            let RequestObject = {
+                activity_id: getNanoId(),
+                title: requestData?.title,
+                code: requestData?.code,
+                description: requestData?.description,
+                date: requestData?.date,
+                status: requestData?.status,
+                index: requestData?.index
+            };
+            const newActivity = await Activity.create(req.body);
+            const sidebarItem = new SidebarItem({
+                title: req.body.title,
+                icon: 'icon',
+                link: `/activities/${newActivity._id}`,
+                order: req.body.index
             });
-          }
-          const existingActivity = await Activity.findOne({ index: req.body.index });
-          if (existingActivity) {
-            return res.status(409).json({
-              Status: "Failed",
-              Message: "Duplicate index found. Please choose a unique index.",
-              Data: {},
-              Code: 409,
+            await sidebarItem.save();
+            return res.status(200).json({
+                Status: 'Success',
+                Message: 'Activity created successfully',
+                Data: newActivity,
+                Code: 200
             });
-          }
-          const newActivity = await Activity.create(req.body);
-          const sidebarItem = new SidebarItem({
-            title: req.body.title,
-            icon: "icon",
-            link: `/activities/${newActivity._id}`,
-            order: req.body.index,
-          });
-          await sidebarItem.save();
-          return res.status(200).json({
-            Status: "Success",
-            Message: "Activity created successfully",
-            Data: newActivity,
-            Code: 200,
-          });
         } catch (error) {
-          console.log("=====error", error);
-          return res.status(500).json({
-            Status: "Failed",
-            Message: "Internal Server Error",
-            Data: {},
-            Code: 500,
-          });
+            console.log('=====error', error);
+            return res.status(500).json({
+                Status: 'Failed',
+                Message: 'Internal Server Error',
+                Data: {},
+                Code: 500
+            });
         }
-      },
-      /**
-       * Get all activities
-       * @param {*} req 
-       * @param {*} res 
-       * @returns 
-       */
-      activities : async (req, res) => {
+    },
+    /**
+     * Get all activities
+     * @param {*} req
+     * @param {*} res
+     * @returns
+     */
+    activities: async (req, res) => {
         try {
             //const activities = await Activity.find().populate('Subactivity');
             const activities = await Activity.find();
@@ -87,11 +98,11 @@ let ActivityController = {
     },
     /**
      * GetList
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    getList : async (req, res) => {
+    getList: async (req, res) => {
         try {
             const activity = await Activity.findById(req.params.id);
             if (!activity) {
@@ -119,12 +130,12 @@ let ActivityController = {
         }
     },
     /**
-     * Update 
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * Update
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    update : async (req, res) => {
+    update: async (req, res) => {
         try {
             // Basic input validation
             if (!req.body.title || !req.body.description || !req.body.index) {
@@ -135,7 +146,7 @@ let ActivityController = {
                     Code: 400
                 });
             }
-    
+
             const activity = await Activity.findByIdAndUpdate(req.body.id, req.body, {
                 new: true
             });
@@ -164,11 +175,11 @@ let ActivityController = {
     },
     /**
      * delete Activity
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    deleteActivity : async (req, res) => {
+    deleteActivity: async (req, res) => {
         try {
             const deletedActivity = await Activity.findByIdAndDelete(req.params.id);
             if (!deletedActivity) {
@@ -183,7 +194,7 @@ let ActivityController = {
             await CheckListModel.deleteMany({
                 main_activity_id: new ObjectId(req.params.id)
             });
-    
+
             res.json({
                 Status: 'Success',
                 Message: 'Activity deleted successfully',
@@ -201,11 +212,11 @@ let ActivityController = {
     },
     /**
      * get mobile activity
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    mobileActivity : async (req, res) => {
+    mobileActivity: async (req, res) => {
         try {
             //const activities = await Activity.find().populate('Subactivity');
             const activities = await Activity.aggregate([

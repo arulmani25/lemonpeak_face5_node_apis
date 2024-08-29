@@ -12,10 +12,10 @@ const UserTypeModel = require('../../Models/UserTypeModel');
 const SidebarController = {
     /**
      * create sidebar
-     * @param {*} req 
-     * @param {*} res 
+     * @param {*} req
+     * @param {*} res
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             const newSidebarItem = await SidebarModel.create(req.body);
             res.status(201).json({
@@ -36,10 +36,10 @@ const SidebarController = {
     },
     /**
      * get sidebar Details
-     * @param {*} req 
-     * @param {*} res 
+     * @param {*} req
+     * @param {*} res
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const getIdByRole = await UserTypeModel.findOne({
                 name: req.loggedUser.user_type
@@ -47,9 +47,9 @@ const SidebarController = {
             const getConfigs = await AccessConfigModel.findOne({
                 role: new mongoose.Types.ObjectId(getIdByRole._id)
             });
-    
+
             const sideBarItems = [];
-    
+
             for (const iterator of getConfigs.sideBar) {
                 if (iterator.read) {
                     sideBarItems.push(iterator.title);
@@ -75,11 +75,11 @@ const SidebarController = {
     },
     /**
      * SidebarItemsList
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    SidebarItemsList : async (req, res) => {
+    SidebarItemsList: async (req, res) => {
         try {
             const sidebarItem = await SidebarModel.find();
             if (!sidebarItem) {
@@ -107,11 +107,11 @@ const SidebarController = {
     },
     /**
      * get details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const sidebarItem = await SidebarModel.findById(req.params.id);
             if (!sidebarItem) {
@@ -139,11 +139,11 @@ const SidebarController = {
     },
     /**
      * update sudebar details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
             const updatedSidebarItem = await SidebarModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!updatedSidebarItem) {
@@ -171,11 +171,11 @@ const SidebarController = {
     },
     /**
      * delete sidebar
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    DeleteSidebarItem : async (req, res) => {
+    DeleteSidebarItem: async (req, res) => {
         try {
             const deletedSidebarItem = await SidebarModel.findByIdAndDelete(req.params.id);
             if (!deletedSidebarItem) {
@@ -201,6 +201,6 @@ const SidebarController = {
             });
         }
     }
-}
+};
 
 module.exports = SidebarController;

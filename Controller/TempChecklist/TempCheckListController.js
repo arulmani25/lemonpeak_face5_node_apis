@@ -10,11 +10,11 @@ const tempChecklistModel = require('../../Models/TempChecklistModel');
 const TempChecklistController = {
     /**
      * create temp_checklist
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             let record;
             const payload = req.body;
@@ -55,10 +55,10 @@ const TempChecklistController = {
     },
     /**
      * list of temp_checklist
-     * @param {*} req 
-     * @param {*} res 
+     * @param {*} req
+     * @param {*} res
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const checkLists = await tempChecklistModel.find();
             res.json({
@@ -78,11 +78,11 @@ const TempChecklistController = {
     },
     /**
      * details of temp_checklist
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const checklistById = await tempChecklistModel.findOne({
                 job_id: new ObjectId(req.params.id) //replace with job id
@@ -112,11 +112,11 @@ const TempChecklistController = {
     },
     /**
      * update temp_checklistdetails
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
             const updatedChecklist = await tempChecklistModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!updatedChecklist) {
@@ -144,11 +144,11 @@ const TempChecklistController = {
     },
     /**
      * delete temp_checklist
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Delete : async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const deleteChecklist = await tempChecklistModel.findByIdAndDelete(req.params.id);
             if (!deleteChecklist) {

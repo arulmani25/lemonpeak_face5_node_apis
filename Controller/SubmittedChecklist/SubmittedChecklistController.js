@@ -12,11 +12,11 @@ const { jobStatus } = require('../../Helpers');
 const JobManagementController = {
     /**
      * create jobmanagement
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             const existingJob = await SubmittedChecklistModel.findOne({
                 job_id: new ObjectId(req.body.job_id)
@@ -29,7 +29,7 @@ const JobManagementController = {
                     Code: 409
                 });
             }
-    
+
             const submittedChecklist = await SubmittedChecklistModel.create(req.body);
             const updateJobStatus = await jobManagementModel.findOneAndUpdate(
                 { _id: new ObjectId(req.body.jobId) },
@@ -53,11 +53,11 @@ const JobManagementController = {
     },
     /**
      * get jobmanagement list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const submittedChecklist = await SubmittedChecklistModel.find({});
             return res.status(200).json({
@@ -78,11 +78,11 @@ const JobManagementController = {
     },
     /**
      * get jobmanagement details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const userType = await SubmittedChecklistModel.findById(req.params.id);
             if (!userType) {
@@ -111,13 +111,15 @@ const JobManagementController = {
     },
     /**
      * update jobmanagement details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
-            const updatedUserType = await SubmittedChecklistModel.findByIdAndUpdate(req.params.id, req.body, { new: true }); // Return updated document
+            const updatedUserType = await SubmittedChecklistModel.findByIdAndUpdate(req.params.id, req.body, {
+                new: true
+            }); // Return updated document
             if (!updatedUserType) {
                 return res.status(404).json({
                     Status: 'Failed',
@@ -144,11 +146,11 @@ const JobManagementController = {
     },
     /**
      * delete jobmanagement
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Delete : async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const deletedCheklist = await SubmittedChecklistModel.findByIdAndDelete(req.params.id);
             if (!deletedCheklist) {
@@ -159,7 +161,7 @@ const JobManagementController = {
                     Code: 404
                 });
             }
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'checklist deleted successfully',
@@ -178,11 +180,11 @@ const JobManagementController = {
     },
     /**
      * check jobcompleted details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    SubmittedjobList : async (req, res) => {
+    SubmittedjobList: async (req, res) => {
         try {
             const jobList = await jobManagementModel.find(
                 {
@@ -191,7 +193,7 @@ const JobManagementController = {
                 {},
                 { sort: { createdAt: -1 } }
             );
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Submitted Job List retrieved successfully',

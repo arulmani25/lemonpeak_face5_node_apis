@@ -9,11 +9,11 @@ const ClientManagementModel = require(ClientManagementLocal);
 const ClientManagement = {
     /**
      * create client
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             if (!req.body.email) {
                 return res.status(400).json({
@@ -42,20 +42,20 @@ const ClientManagement = {
     },
     /**
      * list of client
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const { searchKey, skip, limit, sortkey, sortOrder, status } = req.query;
-    
+
             const sort = {
                 [sortkey ? sortkey : 'createdAt']: !sortOrder || sortOrder === 'DESC' ? -1 : 1
             };
-    
+
             const searchRegex = new RegExp(['^.*', searchKey, '.*$'].join(''), 'i');
-    
+
             const clientList = await ClientManagementModel.aggregate([
                 {
                     $match: status ? { status: status } : {}
@@ -95,11 +95,11 @@ const ClientManagement = {
     },
     /**
      * details of client
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const clientInfo = await ClientManagementModel.findById(req.params.id);
             if (!job) {
@@ -128,11 +128,11 @@ const ClientManagement = {
     },
     /**
      * update client
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
             const updateClient = await ClientManagementModel.findByIdAndUpdate(req.body.id, req.body, {
                 new: true
@@ -162,11 +162,11 @@ const ClientManagement = {
     },
     /**
      * update client details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    UpdateStatus : async (req, res) => {
+    UpdateStatus: async (req, res) => {
         try {
             // Basic input validation
             const clientStatus = await ClientManagementModel.findById(req.params.id);
@@ -178,12 +178,12 @@ const ClientManagement = {
                     Code: 404
                 });
             }
-    
+
             const clientStatusUpdate = await ClientManagementModel.findOneAndUpdate(
                 { _id: req.params.id },
                 { $set: { status: req.body.status } }
             );
-    
+
             return res.json({
                 Status: 'Success',
                 Message: 'Client Status updated successfully',
@@ -201,11 +201,11 @@ const ClientManagement = {
     },
     /**
      * linksite
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    LinkSite : async (req, res) => {
+    LinkSite: async (req, res) => {
         try {
             // Basic input validation
             const getclient = await ClientManagementModel.findById(req.params.id);
@@ -217,12 +217,12 @@ const ClientManagement = {
                     Code: 404
                 });
             }
-    
+
             const clientSiteLink = await ClientManagementModel.findOneAndUpdate(
                 { _id: req.params.id },
                 { $push: { siteDetails: req.body.siteId } }
             );
-    
+
             return res.json({
                 Status: 'Success',
                 Message: 'Client Site Linked successfully',
@@ -240,11 +240,11 @@ const ClientManagement = {
     },
     /**
      * unlink site
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    UnlinkSite : async (req, res) => {
+    UnlinkSite: async (req, res) => {
         try {
             // Basic input validation
             const getclient = await ClientManagementModel.findById(req.params.id);
@@ -256,12 +256,12 @@ const ClientManagement = {
                     Code: 404
                 });
             }
-    
+
             const clientSiteUnLink = await ClientManagementModel.findOneAndUpdate(
                 { _id: req.params.id },
                 { $pull: { siteDetails: req.body.siteId } }
             );
-    
+
             return res.json({
                 Status: 'Success',
                 Message: 'Client Site UnLinked successfully',
@@ -279,11 +279,11 @@ const ClientManagement = {
     },
     /**
      * delete_client_management
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    DeleteClientManagement : async (req, res) => {
+    DeleteClientManagement: async (req, res) => {
         try {
             const removeClient = await ClientManagementModel.findByIdAndDelete(req.params.id);
             if (!removeClient) {
@@ -309,7 +309,6 @@ const ClientManagement = {
             });
         }
     }
-
 };
 
 module.exports = ClientManagement;

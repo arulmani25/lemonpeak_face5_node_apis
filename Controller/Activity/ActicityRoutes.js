@@ -1,9 +1,10 @@
 const Express = require('express');
 const Router = Express.Router();
-const {createActivity, activities, getList,update,deleteActivity,mobileActivity} = require('./ActivitControllers');
+const { createActivity, activities, getList, update, deleteActivity, mobileActivity } = require('./ActivitControllers');
 const { VerifyToken } = require('../../Helpers/JWSToken');
+const { createActivityValidation } = require('./ActivityValidation');
 
-Router.post('/createActivity', VerifyToken, (req, res) => {
+Router.post('/createActivity', VerifyToken, createActivityValidation(), (req, res) => {
     return createActivity(req, res);
 });
 
@@ -26,6 +27,5 @@ Router.delete('/activities/:id', VerifyToken, (req, res) => {
 Router.get('//mobile/activities', VerifyToken, (req, res) => {
     return mobileActivity(req, res);
 });
-
 
 module.exports = Router;

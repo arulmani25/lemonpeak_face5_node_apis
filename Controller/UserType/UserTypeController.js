@@ -9,11 +9,11 @@ const UserType = require('../../Models/UserTypeModel');
 const UserTypeController = {
     /**
      * create usertype
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             if (!req.body.name || !req.body.code) {
                 return res.status(400).json({
@@ -23,7 +23,7 @@ const UserTypeController = {
                     Code: 400
                 });
             }
-    
+
             const existingType = await UserType.findOne({ code: req.body.code });
             if (existingType) {
                 return res.status(409).json({
@@ -33,7 +33,7 @@ const UserTypeController = {
                     Code: 409
                 });
             }
-    
+
             const newUserType = await UserType.create(req.body);
             return res.status(200).json({
                 Status: 'Success',
@@ -53,11 +53,11 @@ const UserTypeController = {
     },
     /**
      * list of usertype
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const userTypes = await UserType.find();
             return res.status(200).json({
@@ -78,11 +78,11 @@ const UserTypeController = {
     },
     /**
      * details of usertype
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const userType = await UserType.findById(req.params.id);
             if (!userType) {
@@ -111,9 +111,9 @@ const UserTypeController = {
     },
     /**
      * update usertype
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
     Update: async (req, res) => {
         try {
@@ -144,11 +144,11 @@ const UserTypeController = {
     },
     /**
      * delete usertype
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Delete : async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const deletedUserType = await UserType.findByIdAndDelete(req.params.id);
             if (!deletedUserType) {

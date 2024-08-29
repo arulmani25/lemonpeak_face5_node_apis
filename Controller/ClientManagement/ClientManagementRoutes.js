@@ -1,6 +1,15 @@
 const Express = require('express');
 const Router = Express.Router();
-const {create, List, Details, Update, UpdateStatus, LinkSite, UnlinkSite, DeleteClientManagement} = require('./ClientManagementController');
+const {
+    create,
+    List,
+    Details,
+    Update,
+    UpdateStatus,
+    LinkSite,
+    UnlinkSite,
+    DeleteClientManagement
+} = require('./ClientManagementController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
 Router.post('/create', VerifyToken, (req, res) => {

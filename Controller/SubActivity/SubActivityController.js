@@ -14,11 +14,11 @@ const ObjectId = mongoose.Types.ObjectId;
 const SubActivityController = {
     /**
      * create SubActivity
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             if (!req.body.title || !req.body.description || !req.body.parentActivity) {
                 return res.status(400).json({
@@ -40,9 +40,9 @@ const SubActivityController = {
                     Code: 400
                 });
             }
-    
+
             // check checklist exist under the main-activity
-    
+
             const isExist = await CheckListModel.findOne({
                 main_activity_id: new ObjectId(activityData._id)
             });
@@ -59,7 +59,7 @@ const SubActivityController = {
             const parentActivitySidebarItem = await SidebarItem.findOne({
                 link: `/activities/${req.body.parentActivity}`
             });
-    
+
             if (!parentActivitySidebarItem) {
                 return res.status(404).json({
                     Status: 'Failed',
@@ -92,11 +92,11 @@ const SubActivityController = {
     },
     /**
      * update sub_activity
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
             // Basic input validation
             if (!req.body.title || !req.body.description || !req.body.parentActivity) {
@@ -133,10 +133,10 @@ const SubActivityController = {
     },
     /**
      * get sub_activity list
-     * @param {*} req 
-     * @param {*} res 
+     * @param {*} req
+     * @param {*} res
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const subactivities = await Subactivity.aggregate([
                 {
@@ -182,11 +182,11 @@ const SubActivityController = {
     },
     /**
      * get sub_activity details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const subactivity = await Subactivity.findById(req.params.id);
             if (!subactivity) {
@@ -214,11 +214,11 @@ const SubActivityController = {
     },
     /**
      * delete sub_activity details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Delete : async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const deletedSubactivity = await Subactivity.findByIdAndDelete(req.params.id);
             if (!deletedSubactivity) {

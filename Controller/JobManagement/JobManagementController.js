@@ -14,11 +14,11 @@ const { generatePdf } = require('../../Helpers/pdfGenerates');
 const JobManagementController = {
     /**
      * create jobmanagement
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
             if (!req.body.siteId || !req?.body?.activityId) {
                 return res.status(400).json({
@@ -55,11 +55,11 @@ const JobManagementController = {
     },
     /**
      * get all jobmanagement list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const {
                 searchKey,
@@ -74,13 +74,13 @@ const JobManagementController = {
                 jobStatus,
                 techNumber
             } = req.query;
-    
+
             const sort = {
                 [sortkey ? sortkey : 'createdAt']: !sortOrder || sortOrder === 'DESC' ? -1 : 1
             };
-    
+
             const searchRegex = new RegExp(['^.*', searchKey, '.*$'].join(''), 'i');
-    
+
             const jobs = await JobManagementModel.aggregate([
                 {
                     $match: clientId ? { clientId: new ObjectId(clientId) } : {}
@@ -186,11 +186,11 @@ const JobManagementController = {
     },
     /**
      * get job_management details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const job = await JobManagementModel.findById(req.params.id);
             if (!job) {
@@ -219,13 +219,12 @@ const JobManagementController = {
     },
     /**
      * update job_management  details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
-
             const job = await JobManagementModel.findByIdAndUpdate(req.body.id, req.body, {
                 new: true
             });
@@ -254,11 +253,11 @@ const JobManagementController = {
     },
     /**
      * update job status
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    UpdateStatus : async (req, res) => {
+    UpdateStatus: async (req, res) => {
         try {
             let createJob;
             let createLocationTracking;
@@ -287,12 +286,12 @@ const JobManagementController = {
             );
             jobStatusUpdate.markModified('jobStatus');
             await jobStatusUpdate.save();
-    
+
             // jobStatusUpdate.jobStatus = req.body.jobStatus;
             // delete jobStatusUpdate._id;
-    
+
             // createJob = await JobManagementModel.create({ ...jobStatusUpdate });
-    
+
             createLocationTracking = await JobLocationTracking.create({
                 jobId: job?.jobId,
                 techNumber: job?.techNumber,
@@ -320,11 +319,11 @@ const JobManagementController = {
     },
     /**
      * delete job
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    DeleteJobManagement : async (req, res) => {
+    DeleteJobManagement: async (req, res) => {
         try {
             const deletedJob = await JobManagementModel.findByIdAndDelete(req.params.id);
             if (!deletedJob) {
@@ -352,11 +351,11 @@ const JobManagementController = {
     },
     /**
      * track_employee_details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    TrackEmployee : async (req, res) => {
+    TrackEmployee: async (req, res) => {
         try {
             const startDate = moment(req.query.fromDate);
             const endDate = moment(req.query.toDate);
@@ -403,15 +402,15 @@ const JobManagementController = {
     },
     /**
      * jobmanagement dashboard
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Dashboard : async (req, res) => {
+    Dashboard: async (req, res) => {
         try {
             // Basic input validation
             const endDate = moment(req.body.toDate);
-    
+
             const dashboardData = await JobManagementModel.aggregate([
                 {
                     $match: req.body.siteId
@@ -447,14 +446,14 @@ const JobManagementController = {
                     }
                 }
             ]);
-    
+
             const obj = {
                 JOB_COMPLETED: 0,
                 JOB_PAUSED: 0,
                 JOB_STARTED: 0,
                 NOT_STARTED: 0
             };
-    
+
             dashboardData.forEach((el) => {
                 if (el._id === jobStatus.JOB_COMPLETED) {
                     obj.JOB_COMPLETED = el.count;
@@ -466,7 +465,7 @@ const JobManagementController = {
                     obj.NOT_STARTED = el.count;
                 }
             });
-    
+
             return res.json({
                 Status: 'Success',
                 Message: 'Dashboard Data retrived successfully',
@@ -484,51 +483,56 @@ const JobManagementController = {
     },
     /**
      * geaph details in jobmanagement list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Graphdata : async (req, res) => {
+    Graphdata: async (req, res) => {
         try {
             const fromDate = req.body.fromDate;
             const toDate = req.body.toDate;
-    
+
             const dateList = [];
-    
+
             const barchatData = [];
-    
+
             const groupData = [];
-    
-            const keysToAdd = [jobStatus.JOB_COMPLETED, jobStatus.JOB_PAUSED, jobStatus.JOB_STARTED, jobStatus.NOT_STARTED];
+
+            const keysToAdd = [
+                jobStatus.JOB_COMPLETED,
+                jobStatus.JOB_PAUSED,
+                jobStatus.JOB_STARTED,
+                jobStatus.NOT_STARTED
+            ];
             const barChartData1 = [
                 { data: barchatData, label: 'Job Completed' },
                 { data: barchatData, label: 'Job Paused' },
                 { data: barchatData, label: 'Job Started' },
                 { data: barchatData, label: 'Job Not Started' }
             ];
-    
+
             let barChartLabels;
-    
+
             const tempData = [];
-    
+
             let barChart_data;
-    
+
             if (fromDate && toDate) {
                 const from_date = moment(fromDate);
                 const endDate = moment(toDate);
                 const diff = endDate.diff(from_date, 'days');
                 dateList.push(moment(toDate).format('YYYY-MM-DD'));
-    
+
                 const differenceInDays = endDate.diff(from_date, 'days');
-    
+
                 for (let i = 0; i <= diff - 1; i++) {
                     dateList.push(endDate.subtract(1, 'days').format('YYYY-MM-DD'));
                 }
                 barChartLabels = [dateList].flat(1);
-    
+
                 for (const iterator of barChartLabels) {
                     const customDate = moment(iterator);
-    
+
                     const data = await jobManagementModel.aggregate([
                         {
                             $match: req.body.siteId ? { siteId: new ObjectId(req.body.siteId) } : {}
@@ -552,7 +556,7 @@ const JobManagementController = {
                     ]);
                     tempData.push({ date: iterator, temp: data });
                 }
-    
+
                 for (const iterator of tempData) {
                     if (iterator.temp.length > 0) {
                         iterator.temp.forEach((el) => {
@@ -568,14 +572,14 @@ const JobManagementController = {
                         });
                     }
                 }
-    
+
                 // Initialize an object to hold the grouped data
                 const groupedData = {};
-    
+
                 // Iterate through the input data
                 groupData.forEach((item) => {
                     const { date, ...statusCounts } = item;
-    
+
                     // If the date is not in the groupedData, initialize it
                     if (!groupedData[date]) {
                         groupedData[date] = {
@@ -586,16 +590,16 @@ const JobManagementController = {
                             'NOT STARTED': 0
                         };
                     }
-    
+
                     // Add the status counts to the corresponding date
                     Object.keys(statusCounts).forEach((status) => {
                         groupedData[date][status] += statusCounts[status];
                     });
                 });
-    
+
                 // Convert the grouped data back to an array format
                 const result = Object.values(groupedData);
-    
+
                 result.forEach((item) => {
                     keysToAdd.forEach((key) => {
                         if (!item.hasOwnProperty(key)) {
@@ -603,7 +607,7 @@ const JobManagementController = {
                         }
                     });
                 });
-    
+
                 barChart_data = [
                     {
                         data: result.map((item) => item['JOB COMPLETED']),
@@ -624,14 +628,14 @@ const JobManagementController = {
                 ];
             } else {
                 const currentDate = moment();
-    
+
                 dateList.push(currentDate.format('YYYY-MM-DD'));
-    
+
                 for (let i = 0; i <= 6; i++) {
                     dateList.push(currentDate.subtract(1, 'days').format('YYYY-MM-DD'));
                 }
                 barChartLabels = [dateList].flat(1);
-    
+
                 for (const iterator of dateList) {
                     const customDate = moment(iterator);
                     const data = await jobManagementModel.aggregate([
@@ -657,7 +661,7 @@ const JobManagementController = {
                     ]);
                     tempData.push({ date: iterator, temp: data });
                 }
-    
+
                 for (const iterator of tempData) {
                     if (iterator.temp.length > 0) {
                         iterator.temp.forEach((el) => {
@@ -675,11 +679,11 @@ const JobManagementController = {
                 }
                 // Initialize an object to hold the grouped data
                 const groupedData = {};
-    
+
                 // Iterate through the input data
                 groupData.forEach((item) => {
                     const { date, ...statusCounts } = item;
-    
+
                     // If the date is not in the groupedData, initialize it
                     if (!groupedData[date]) {
                         groupedData[date] = {
@@ -690,16 +694,16 @@ const JobManagementController = {
                             'NOT STARTED': 0
                         };
                     }
-    
+
                     // Add the status counts to the corresponding date
                     Object.keys(statusCounts).forEach((status) => {
                         groupedData[date][status] += statusCounts[status];
                     });
                 });
-    
+
                 // Convert the grouped data back to an array format
                 const result = Object.values(groupedData);
-    
+
                 result.forEach((item) => {
                     keysToAdd.forEach((key) => {
                         if (!item.hasOwnProperty(key)) {
@@ -707,7 +711,7 @@ const JobManagementController = {
                         }
                     });
                 });
-    
+
                 barChart_data = [
                     {
                         data: result.map((item) => item['JOB COMPLETED']),
@@ -727,7 +731,7 @@ const JobManagementController = {
                     }
                 ];
             }
-    
+
             return res.json({
                 Status: 'Success',
                 Message: 'Graph Data retrived successfully',
@@ -745,11 +749,11 @@ const JobManagementController = {
     },
     /**
      * generate_pdf
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Generatepdf : async (req, res) => {
+    Generatepdf: async (req, res) => {
         try {
             const pdfFilename = await generatePdf(req?.body);
             if (pdfFilename === 'false') {
@@ -777,11 +781,11 @@ const JobManagementController = {
     },
     /**
      * job list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    MobileJoblist : async (req, res) => {
+    MobileJoblist: async (req, res) => {
         try {
             const jobList = await JobManagementModel.aggregate([
                 {
@@ -824,7 +828,6 @@ const JobManagementController = {
             });
         }
     }
-
 };
 
 module.exports = JobManagementController;

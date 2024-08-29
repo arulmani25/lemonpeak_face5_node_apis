@@ -9,11 +9,11 @@ const Attendance = require('../../Models/AttendanceModel');
 const AttendanceController = {
     /**
      * create attendance
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    createAttendance : async (req, res) => {
+    createAttendance: async (req, res) => {
         try {
             if (!req.body.userPhoneNumber || !req.body.location || !req.body.lat || !req.body.lan) {
                 return res.status(400).json({
@@ -23,9 +23,9 @@ const AttendanceController = {
                     Code: 400
                 });
             }
-    
+
             const record = await Attendance.create(req.body);
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Attendance submitted successfully',
@@ -44,11 +44,11 @@ const AttendanceController = {
     },
     /**
      * get last_status
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Getlaststatus : async (req, res) => {
+    Getlaststatus: async (req, res) => {
         try {
             const startDate = moment();
             const attendanceList = await Attendance.find({
@@ -77,15 +77,15 @@ const AttendanceController = {
     },
     /**
      * get attendance list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
     List: async (req, res) => {
         try {
             const startDate = moment(req?.body?.fromDate);
             const endDate = moment(req?.body?.toDate);
-    
+
             const data = await Attendance.aggregate([
                 {
                     $match:
@@ -134,7 +134,7 @@ const AttendanceController = {
                     }
                 }
             ]);
-    
+
             const finalRecord = [];
             data.forEach((iterator) => {
                 finalRecord.push({
@@ -147,7 +147,7 @@ const AttendanceController = {
                     checkOutlocation: iterator.lastRecord.checkOutTime ? iterator.lastRecord.location : ''
                 });
             });
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Attendance retrieved successfully',
@@ -166,15 +166,15 @@ const AttendanceController = {
     },
     /**
      * emp_list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    EmpList : async (req, res) => {
+    EmpList: async (req, res) => {
         try {
             const startDate = moment(req?.body?.fromDate);
             const endDate = moment(req?.body?.toDate);
-    
+
             const activity = await Attendance.aggregate([
                 {
                     $match:
@@ -197,7 +197,7 @@ const AttendanceController = {
                     $sort: { createdAt: -1 }
                 }
             ]);
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Attendance retrieved successfully',
@@ -214,7 +214,6 @@ const AttendanceController = {
             });
         }
     }
-
 };
 
 module.exports = AttendanceController;

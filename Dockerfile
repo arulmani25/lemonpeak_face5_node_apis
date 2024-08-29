@@ -12,6 +12,6 @@ RUN npm install --omit=dev --ignore-scripts=true
 # Bundle app Source
 COPY . /usr/src/app
 
-EXPOSE 3000
+EXPOSE 2023
 CMD ["sh", "-c", "node Source/index.js"]
 RUN mkdir -p /usr/src/app/temp

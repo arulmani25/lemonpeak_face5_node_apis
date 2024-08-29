@@ -1,6 +1,6 @@
 const Express = require('express');
 const Router = Express.Router();
-const {create, List, SidebarItemsList,Details, Update, DeleteSidebarItem} = require('./SidebarController');
+const { create, List, SidebarItemsList, Details, Update, DeleteSidebarItem } = require('./SidebarController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
 Router.post('/sidebar-items', VerifyToken, (req, res) => {
@@ -11,7 +11,7 @@ Router.get('/listbyrole', VerifyToken, (req, res) => {
     return List(req, res);
 });
 
-Router.get("/sidebar-items", VerifyToken, (req, res) => {
+Router.get('/sidebar-items', VerifyToken, (req, res) => {
     return SidebarItemsList(req, res);
 });
 

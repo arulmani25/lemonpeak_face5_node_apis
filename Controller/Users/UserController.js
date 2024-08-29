@@ -19,13 +19,19 @@ function hashPassword(password) {
 const UserController = {
     /**
      * create user
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    create : async (req, res) => {
+    create: async (req, res) => {
         try {
-            if (!req.body.username || !req.body.email || !req.body.password || !req.body.firstName || !req.body.lastName) {
+            if (
+                !req.body.username ||
+                !req.body.email ||
+                !req.body.password ||
+                !req.body.firstName ||
+                !req.body.lastName
+            ) {
                 return res.status(400).json({
                     Status: 'Failed',
                     Message: 'Required fields are missing',
@@ -33,7 +39,7 @@ const UserController = {
                     Code: 400
                 });
             }
-    
+
             const existingUsername = await User.findOne({
                 username: req.body.username
             });
@@ -45,7 +51,7 @@ const UserController = {
                     Code: 409
                 });
             }
-    
+
             const existingEmail = await User.findOne({ email: req.body.email });
             if (existingEmail) {
                 return res.status(409).json({
@@ -76,11 +82,11 @@ const UserController = {
     },
     /**
      * user list
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    List : async (req, res) => {
+    List: async (req, res) => {
         try {
             const users = await User.find().populate('userType');
             return res.status(200).json({
@@ -101,11 +107,11 @@ const UserController = {
     },
     /**
      * get user details
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Details : async (req, res) => {
+    Details: async (req, res) => {
         try {
             const user = await User.findById(req.params.id).populate('userType');
             if (!user) {
@@ -134,11 +140,11 @@ const UserController = {
     },
     /**
      * update use details
-     * @param {update} req 
-     * @param {*} res 
-     * @returns 
+     * @param {update} req
+     * @param {*} res
+     * @returns
      */
-    Update : async (req, res) => {
+    Update: async (req, res) => {
         try {
             const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
                 new: true
@@ -151,11 +157,11 @@ const UserController = {
                     Code: 404
                 });
             }
-    
+
             if (req.body.password) {
                 req.body.password = hashPassword(req.body.password);
             }
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'User updated successfully',
@@ -174,11 +180,11 @@ const UserController = {
     },
     /**
      * delete user
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Delete : async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const deletedUser = await User.findByIdAndDelete(req.params.id);
             if (!deletedUser) {
@@ -207,11 +213,11 @@ const UserController = {
     },
     /**
      * login user
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    Login : async (req, res) => {
+    Login: async (req, res) => {
         try {
             const user = await User.findOne({
                 $or: [{ username: req.body.username }, { email: req.body.username }]
@@ -242,7 +248,7 @@ const UserController = {
             });
             user['_doc'].token = token;
             delete user['_doc'].password;
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'User Logged successfully',
@@ -261,11 +267,11 @@ const UserController = {
     },
     /**
      * update user password
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    UpdatePassword : async (req, res) => {
+    UpdatePassword: async (req, res) => {
         try {
             if (req.body.oldPassword === req.body.newPassword) {
                 return res.status(404).json({
@@ -294,14 +300,14 @@ const UserController = {
                 });
             }
             const hashedPassword = await hashPassword(req.body.newPassword);
-    
+
             const updateNewPassword = await User.findOneAndUpdate(
                 {
                     _id: new ObjectId(user._id)
                 },
                 { $set: { password: hashedPassword } }
             );
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Password Updated Successfully',
@@ -320,11 +326,11 @@ const UserController = {
     },
     /**
      * forgot user password
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
+     * @param {*} req
+     * @param {*} res
+     * @returns
      */
-    ForgotPassword : async (req, res) => {
+    ForgotPassword: async (req, res) => {
         try {
             const user = await User.findOne({
                 $or: [{ email: req.body.username }, { username: req.body.username }]
@@ -359,16 +365,16 @@ const UserController = {
             </div>
           `;
             const mailSent = await sendMailNotification(user.email, 'Reset Password', template);
-    
+
             const hashedPassword = await hashPassword(random);
-    
+
             const updateNewPassword = await User.findOneAndUpdate(
                 {
                     _id: new ObjectId(user._id)
                 },
                 { $set: { password: hashedPassword } }
             );
-    
+
             return res.status(200).json({
                 Status: 'Success',
                 Message: 'Password Sent To Mail',
