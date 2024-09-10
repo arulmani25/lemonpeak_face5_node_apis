@@ -10,11 +10,11 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    fcm_token: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
     userType: { type: mongoose.Schema.Types.ObjectId, ref: 'UserType' }
 });
 UserSchema.plugin(timestamps);
-
 const User = mongoose.model('User', UserSchema);
 
 module.exports = User;

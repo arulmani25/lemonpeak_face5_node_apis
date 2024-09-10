@@ -19,8 +19,8 @@ const Temp_checklistSchema = new mongoose.Schema({
             date_of_update: { type: Date },
             created_by: { type: objectId },
             updated_by: { type: objectId },
-            main_activity_id: { type: objectId },
-            sub_activity_id: { type: objectId },
+            main_activity_id: { type: String },
+            sub_activity_id: { type: String },
             delete_status: { type: Boolean },
             field_required: { type: Boolean }
         }

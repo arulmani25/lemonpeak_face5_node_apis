@@ -1,38 +1,31 @@
 const { check } = require('express-validator');
 
-const Validate = {
-    /**
-     * List Validation
-     * @returns
-     */
-    listValidation: () => {
-        return [check('title', 'please enter the title').notEmpty({ ignore_whitespace: true })];
-    },
+const ActivityValidate = {
     /**
      * Create Activity
      * @returns
      */
-    createActivityValidation: () => {
+    createValidation: () => {
         return [
-            check('title', 'please enter the title').notEmpty().trim(),
-            check('description', 'please enter description').notEmpty().trim(),
-            check('index', 'please enter index').notEmpty().trim()
+            check('title', 'please enter the title').trim().notEmpty(),
+            check('description', 'please enter description').trim().notEmpty(),
+            check('index', 'please enter index').trim().notEmpty()
         ];
     },
     /**
      * Update Status
      * @returns
      */
-    UpdateStatus: () => {
+    updateStatusValidation: () => {
         return [
-            check('activity_id', 'please enter activity_id').notEmpty().trim(),
-            check('title', 'please enter the title').notEmpty().trim(),
-            check('description', 'please enter description').notEmpty().trim(),
-            check('index', 'please enter index').notEmpty().trim()
+            check('activity_id', 'please enter activity_id').trim().notEmpty(),
+            check('title', 'please enter the title').trim().notEmpty(),
+            check('description', 'please enter description').trim().notEmpty(),
+            check('index', 'please enter index').trim().notEmpty()
         ];
     },
     detailValidation: () => {
-        return [check('activity_id', 'please enter the activity_id').notEmpty({ ignore_whitespace: true })];
+        return [check('activity_id', 'please enter the activity_id').trim().notEmpty()];
     }
 };
-module.exports = Validate;
+module.exports = ActivityValidate;

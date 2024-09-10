@@ -319,7 +319,7 @@ app.use('/api/', express.static(path.join(__dirname, 'assets')));
 // ***--------------------------------------------------------------------------Face5 routes start------------------------------------------------------------//
 
 app.use('/api/face5/accessconfig', require('./Controller/AccessConfig/AccessConfigRoutes'));
-app.use('/api/face5/activity', require('./Controller/Activity/ActicityRoutes'));
+app.use('/api/face5/activity', require('./Controller/Activity/ActivityRoutes'));
 app.use('/api/face5/attendance', require('./Controller/Attendance/AttendanceRoutes'));
 app.use('/api/face5/checklist', require('./Controller/Checklist/ChecklistRoutes'));
 app.use('/api/face5/clientmanagement', require('./Controller/ClientManagement/ClientManagementRoutes'));
@@ -332,7 +332,7 @@ app.use('/api/face5/subadminaccess', require('./Controller/Subadminaccess/SubAdm
 app.use('/api/face5/submitchecklist', require('./Controller/SubmittedChecklist/SubmittedChecklistRoutes'));
 app.use('/api/face5/tempchecklist', require('./Controller/TempChecklist/TempChecklistRoutes'));
 app.use('/api/face5/users', require('./Controller/Users/UserRoutes'));
-app.use('/api/face5/usertype', require('./Controller/UserType/UserRoutes'));
+app.use('/api/face5/usertype', require('./Controller/UserType/UserTypeRoutes'));
 
 // ***---------------------------------------------------------------------------------------------------------------------------------------------------------//
 

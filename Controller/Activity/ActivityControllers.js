@@ -4,9 +4,9 @@ const {
     findActicity,
     deleteActivity,
     updateActivity
-} = require('../Repositoty/activityrepositary');
-const { todayDate, endDate, dateFinder, getNanoId, isEmpty } = require('../Helpers/Utils');
-const SidebarModel = require('../Models/SidebarModel');
+} = require('../../Repositary/activityrepositary');
+const { todayDate, endDate, dateFinder, getNanoId, isEmpty } = require('../../Helpers/Utils');
+const SidebarModel = require('../../Models/SidebarModel');
 
 const ActivityController = {
     /**
@@ -14,9 +14,8 @@ const ActivityController = {
      * @param {*} requestData
      * @returns
      */
-    createActivity: async (requestData) => {
+    Create: async (requestData) => {
         try {
-            let uniqeID = 'active_' + getNanoId();
             if (!requestData?.title || !requestData?.description || !requestData?.index) {
                 return {
                     error: 'Failed',
@@ -33,7 +32,7 @@ const ActivityController = {
                 };
             }
             let requestObjrect = {
-                activity_id: uniqeID,
+                activity_id: getNanoId(),
                 title: requestData?.title,
                 code: requestData?.code,
                 description: requestData?.description,
@@ -52,7 +51,7 @@ const ActivityController = {
             const Sidebaritem = new SidebarModel({
                 title: requestData?.title,
                 icon: 'icon',
-                link: `/activities/${newActivity._id}`,
+                link: `/activities/${newActivity.activity_id}`,
                 order: requestData?.index
             });
             await Sidebaritem.save();
@@ -64,8 +63,8 @@ const ActivityController = {
         } catch (error) {
             return {
                 error: true,
-                message: error,
-                data: undefined
+                message: error.message,
+                data: {}
             };
         }
     },
@@ -75,31 +74,41 @@ const ActivityController = {
      * @param {*} activity_id
      * @returns
      */
-    list: async (query, activity_id) => {
+    List: async (query, activity_id) => {
         try {
             let queryObject = {};
-            let limit = query?.limit ? Number.parseInt(query?.limit) : 10;
+            let limit = query?.limit ? Number.parseInt(query?.limit) : 20;
             let page = query?.page ? Number.parseInt(query?.page) : 1;
+
             if (query?.activity_id) queryObject['activity_id'] = query?.activity_id;
-            if (query?.name) queryObject['name'] = query?.name;
+            if (query?.status) queryObject['status'] = query?.status;
+            if (query?.user_role) queryObject['description.user_role'] = query?.user_role;
             if (query?.from_date || query?.to_date || query.date_option) {
                 queryObject['createdAt'] = dateFinder(query);
             }
             if (activity_id) {
                 queryObject['activity_id'] = activity_id;
             }
-            let activityData = await findActicity(queryObject);
-            if (isEmpty(activityData)) {
+            let projection = {
+                _id: 0,
+                __v: 0
+            };
+            let complaintData = await ComplaintModel.find(queryObject, projection)
+                .limit(limit)
+                .skip((page - 1) * limit)
+                .sort({ _id: -1 })
+                .lean();
+            if (isEmpty(complaintData)) {
                 return {
                     error: true,
-                    message: 'activity list is not found',
+                    message: 'Complaint list is not found',
                     data: undefined
                 };
             }
             return {
                 error: false,
-                message: 'Activity list',
-                data: activityData
+                message: 'Complaint list',
+                data: complaintData
             };
         } catch (error) {
             return {
@@ -114,7 +123,7 @@ const ActivityController = {
      * @param {*} queryData
      * @returns
      */
-    detail: async (queryData) => {
+    Details: async (queryData) => {
         console.log(queryData);
         if (isEmpty(queryData)) {
             return {
@@ -151,7 +160,7 @@ const ActivityController = {
      * @param { } requestData
      * @returns
      */
-    update: async (requestData) => {
+    Update: async (requestData) => {
         try {
             if (isEmpty(requestData)) {
                 return {
@@ -208,7 +217,7 @@ const ActivityController = {
      * @param {*} activity_id
      * @returns
      */
-    deleteActivity: async (activity_id) => {
+    Delete: async (activity_id) => {
         console.log(activity_id);
         console.log(1234);
         try {
