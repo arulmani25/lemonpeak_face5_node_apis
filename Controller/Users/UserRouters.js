@@ -1,15 +1,15 @@
 const Express = require('express');
 const Router = Express.Router();
-const { Create, List, Details, Update, Delete } = require('./UserTypeController');
+const { Create, List, Details, Update, Delete, Login, UpdatePassword, ForgotPassword } = require('./UserController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
-const { validationResult } = require('express-validator');
-const { createValidation, updateValidation } = require('./UserTypeValidation');
 const { isEmpty } = require('../../Helpers/Utils');
-const { sendSuccessData, sendFailureMessage, sendSuccessMessage } = require('../../App/Responder');
+const { validationResult } = require('express-validator');
+const { createValidation, updateValidation } = require('./UserValidation');
+const { sendSuccessData, sendSuccessMessage, sendFailureMessage } = require('../../App/Responder');
 
-Router.post('/create', VerifyToken, createValidation(), async (request, response) => {
+Router.post('/create', createValidation(), async (request, response) => {
     try {
-        let hasErrors = validationResult(request);
+        let hasErrors = validationResult(request, response);
         if (hasErrors.isEmpty()) {
             let { error, message, data } = await Create(request?.body);
             if (!isEmpty(data) && error === false) {
@@ -24,9 +24,9 @@ Router.post('/create', VerifyToken, createValidation(), async (request, response
     }
 });
 
-Router.get('/list/:userTypeID?', VerifyToken, async (request, response) => {
+Router.get('/list', VerifyToken, async (request, response) => {
     try {
-        let { error, message, data } = await List(request?.query, request?.params?.userTypeID);
+        let { error, message, data } = await List(request?.query, request?.params?.userID);
         if (!isEmpty(data) && error === false) {
             return sendSuccessData(response, message, data);
         }
@@ -36,10 +36,9 @@ Router.get('/list/:userTypeID?', VerifyToken, async (request, response) => {
     }
 });
 
-Router.get('/details/:userTypeID', VerifyToken, async (request, response) => {
+Router.get('/details/:userId', VerifyToken, async (request, response) => {
     try {
-        console.log(request?.params?.activityId);
-        let { error, message, data } = await Details(request?.params?.userTypeID);
+        let { error, message, data } = await Details(request?.params?.userId);
         if (!isEmpty(data) && error === false) {
             return sendSuccessData(response, message, data);
         }
@@ -66,7 +65,8 @@ Router.patch('/update', VerifyToken, updateValidation(), async (request, respons
     }
 });
 
-Router.delete('/delete/:userTypeID', VerifyToken, async (request, response) => {
+Router.delete('/delete/:id', VerifyToken, async (request, response) => {
+    // return Delete(req, res);
     try {
         let { error, message, data } = await Delete(request.params.userTypeID);
         if (!isEmpty(data) && error === false) {
@@ -76,6 +76,31 @@ Router.delete('/delete/:userTypeID', VerifyToken, async (request, response) => {
     } catch (error) {
         return sendFailureMessage(response, error, 500);
     }
+});
+
+Router.post('/login/:fcm', async (request, response) => {
+    // return Login(req, res);
+    try {
+        let { error, message, data } = await Login(request?.body, request?.params?.fcm);
+        console.log(error, message, data);
+        console.log(!isEmpty(data) && error === false);
+        if (!isEmpty(data) && error === false) {
+            console.log(data, message, error);
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error, 500);
+    }
+});
+
+Router.post('/updatepassword', VerifyToken, (req, res) => {
+    return UpdatePassword(req, res);
+});
+
+// forgotpassword
+Router.post('/forgotpassword', (req, res) => {
+    return ForgotPassword(req, res);
 });
 
 module.exports = Router;

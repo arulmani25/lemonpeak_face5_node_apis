@@ -5,7 +5,12 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const User = require('../../Models/UserModel');
 const UserType = require('../../Models/UserTypeModel');
-const { createUserType, findOneUserType, updateUserType , deleteUserType} = require('../../Repositary/UserTyperepositary');
+const {
+    createUserType,
+    findOneUserType,
+    updateUserType,
+    deleteUserType
+} = require('../../Repositary/UserTyperepositary');
 const { isEmpty } = require('../../Helpers/Utils');
 
 const UserTypeController = {
@@ -131,7 +136,7 @@ const UserTypeController = {
                 };
             }
         } catch (error) {
-            return{
+            return {
                 error: true,
                 message: error.message,
                 data: {}
@@ -145,14 +150,14 @@ const UserTypeController = {
      */
     Update: async (requestData) => {
         try {
-            if(isEmpty(requestData)){
+            if (isEmpty(requestData)) {
                 return {
                     error: true,
                     message: 'input value is not empty',
                     data: undefined
                 };
             }
-            const getUserType = await findOneUserType({user_type_id: requestData?.user_type_id});
+            const getUserType = await findOneUserType({ user_type_id: requestData?.user_type_id });
             if (!getUserType) {
                 return {
                     error: true,
@@ -165,12 +170,12 @@ const UserTypeController = {
             getUserType.code = requestData?.code ?? getUserType?.code;
             getUserType.description = requestData?.description ?? getUserType?.description;
 
-            getUserType.markModified(['name','code', 'description']);
+            getUserType.markModified(['name', 'code', 'description']);
             const updatedUserType = await getUserType.save();
             return {
                 error: false,
                 message: 'user_type updated successfully',
-                debuggerata: updatedUserType,
+                debuggerata: updatedUserType
             };
         } catch (error) {
             return {
@@ -199,7 +204,7 @@ const UserTypeController = {
             if (isEmpty(UserType)) {
                 return {
                     error: true,
-                    message: 'user_type is not available',
+                    message: 'user_type is not found',
                     data: {}
                 };
             } else {
@@ -221,7 +226,7 @@ const UserTypeController = {
             return {
                 error: true,
                 message: error.message,
-                data:{}
+                data: {}
             };
         }
     }

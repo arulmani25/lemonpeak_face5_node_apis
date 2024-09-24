@@ -331,7 +331,7 @@ app.use('/api/face5/subactivity', require('./Controller/SubActivity/SubActivityR
 app.use('/api/face5/subadminaccess', require('./Controller/Subadminaccess/SubAdminRoutes'));
 app.use('/api/face5/submitchecklist', require('./Controller/SubmittedChecklist/SubmittedChecklistRoutes'));
 app.use('/api/face5/tempchecklist', require('./Controller/TempChecklist/TempChecklistRoutes'));
-app.use('/api/face5/users', require('./Controller/Users/UserRoutes'));
+app.use('/api/face5/users', require('./Controller/Users/UserRouters'));
 app.use('/api/face5/usertype', require('./Controller/UserType/UserTypeRoutes'));
 
 // ***---------------------------------------------------------------------------------------------------------------------------------------------------------//

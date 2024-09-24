@@ -23,8 +23,5 @@ const UserTypeValidate = {
             check('description', 'please enter description').trim().notEmpty()
         ];
     }
-    // detailValidation: () => {
-    //     return [check('activity_id', 'please enter the activity_id').trim().notEmpty()];
-    // }
 };
 module.exports = UserTypeValidate;
