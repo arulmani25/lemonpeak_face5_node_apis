@@ -66,7 +66,6 @@ Router.patch('/update', VerifyToken, updateValidation(), async (request, respons
 });
 
 Router.delete('/delete/:id', VerifyToken, async (request, response) => {
-    // return Delete(req, res);
     try {
         let { error, message, data } = await Delete(request.params.userTypeID);
         if (!isEmpty(data) && error === false) {
@@ -79,7 +78,6 @@ Router.delete('/delete/:id', VerifyToken, async (request, response) => {
 });
 
 Router.post('/login/:fcm', async (request, response) => {
-    // return Login(req, res);
     try {
         let { error, message, data } = await Login(request?.body, request?.params?.fcm);
         console.log(error, message, data);
@@ -98,7 +96,6 @@ Router.post('/updatepassword', VerifyToken, (req, res) => {
     return UpdatePassword(req, res);
 });
 
-// forgotpassword
 Router.post('/forgotpassword', (req, res) => {
     return ForgotPassword(req, res);
 });
