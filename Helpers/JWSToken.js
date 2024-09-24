@@ -30,7 +30,7 @@ let JWSToken = {
      * @param {*} next
      * @returns
      */
-    VerifyToken: async (request, next) => {
+    VerifyToken: async (request, _response, next) => {
         try {
             if (isEmpty(request?.headers?.authorization)) {
                 return {
@@ -50,10 +50,9 @@ let JWSToken = {
                         data: {}
                     };
                 }
-                const loggedUser = { user_id: decoded.user_id };
-
+                const loggedUser = { logged_user_id: decoded.logged_user_id };
                 const userExist = await findOneUser({
-                    user_id: loggedUser.user_id
+                    user_id: loggedUser.logged_user_id
                 });
 
                 if (!userExist) {
