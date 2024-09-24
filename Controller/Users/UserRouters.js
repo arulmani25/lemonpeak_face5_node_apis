@@ -110,7 +110,7 @@ Router.patch('/updatepassword', VerifyToken, updatePassWordValidation(), async (
 
 Router.patch('/forgotpassword', async (request, response) => {
     try {
-        let { error, message, data } = await Update(request?.body);
+        let { error, message, data } = await ForgotPassword(request?.body);
         if (!isEmpty(data) && error === false) {
             return sendSuccessMessage(response, message, data);
         }

@@ -4,14 +4,14 @@ const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const mongoose = require('mongoose');
-const User = require('../../Models/UserModel');
+const UserModel = require('../../Models/UserModel');
 const ObjectId = mongoose.Types.ObjectId;
 const bcrypt = require('bcryptjs');
 const { getNanoId, isEmpty } = require('../../Helpers/Utils');
 const { GenerateToken } = require('../../Helpers/JWSToken');
 const { checkPassword } = require('../../Helpers/passwordvalidation');
 const { sendMailNotification } = require('../../Helpers/mailservice');
-const { createUser, findOneUser, findUser, deleteUser } = require('../../Repositary/Userrepositary');
+const { createUser, findOneUser, deleteUser } = require('../../Repositary/Userrepositary');
 const { findOneUserType } = require('../../Repositary/UserTyperepositary');
 
 function hashPassword(password) {
@@ -131,10 +131,9 @@ const UserController = {
                 _id: 0,
                 __v: 0
             };
-            let userData = await findUser(queryObject, projection)
+            let userData = await UserModel.find(queryObject, projection)
                 .limit(limit)
                 .skip((page - 1) * limit)
-                .sort({ _id: -1 })
                 .lean();
             if (isEmpty(userData)) {
                 return {

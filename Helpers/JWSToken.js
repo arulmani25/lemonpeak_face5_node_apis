@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const { isEmpty } = require('../Helpers/Utils');
+const { findOneUser } = require('../Repositary/Userrepositary');
 const userModel = require('../Models/UserModel');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
@@ -25,31 +27,48 @@ let JWSToken = {
      * @param {*} next
      * @returns
      */
-    VerifyToken: async (req, res, next) => {
+    VerifyToken: async (request, next) => {
         try {
-            if (!req.headers.authorization) throw new Error('Provide a valid JWT Token');
+            if (isEmpty(request?.headers?.authorization)) {
+                return {
+                    error: true,
+                    message: 'Provide a valid JWT Token',
+                    data: {}
+                };
+            }
 
-            const token = req.headers.authorization?.split(' ')[1];
+            const token = request.headers.authorization?.split(' ')[1];
 
             jwt.verify(token, process.env.SECRET_KEY, async (err, decoded) => {
                 if (err) {
-                    return res.json({ status: 401, message: 'Invalid Token' });
-                } else {
-                    let loggedUser = { _id: decoded.user_id };
-
-                    const userExist = await userModel.findOne({
-                        _id: new ObjectId(loggedUser._id)
-                    });
-
-                    if (!userExist) {
-                        return res.json({ status: 401, message: 'UnAuthorized User' });
-                    }
-                    req.loggedUser = decoded;
-                    next();
+                    return {
+                        error: true,
+                        message: 'Invalid Token',
+                        data: {}
+                    };
                 }
+                const loggedUser = { user_id: decoded.user_id };
+
+                const userExist = await findOneUser({
+                    user_id: loggedUser.user_id
+                });
+
+                if (!userExist) {
+                    return {
+                        error: true,
+                        message: 'Unauthorized User',
+                        data: {}
+                    };
+                }
+                request.loggedUser = decoded;
+                next();
             });
         } catch (error) {
-            return res.json({ status: 401, message: error.message });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };
