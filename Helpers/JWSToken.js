@@ -14,10 +14,13 @@ let JWSToken = {
     GenerateToken: async (payload) => {
         try {
             const token = jwt.sign(payload, process.env.SECRET_KEY);
-
             return token;
         } catch (error) {
-            console.log(error);
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**

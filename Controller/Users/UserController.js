@@ -338,6 +338,13 @@ const UserController = {
                 user_id: String(user?.user_id),
                 user_type: user?.userType
             });
+            if(token?.error === true) {
+                return {
+                    error: true,
+                    message: token?.message,
+                    data: {}
+                };
+            }
             user['_doc'].token = token;
             delete user['_doc'].password;
             return {
