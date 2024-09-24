@@ -4,7 +4,7 @@ const { Create, List, Details, Update, Delete, Login, UpdatePassword, ForgotPass
 const { VerifyToken } = require('../../Helpers/JWSToken');
 const { isEmpty } = require('../../Helpers/Utils');
 const { validationResult } = require('express-validator');
-const { createValidation, updateValidation } = require('./UserValidation');
+const { createValidation, updateValidation, updatePassWordValidation } = require('./UserValidation');
 const { sendSuccessData, sendSuccessMessage, sendFailureMessage } = require('../../App/Responder');
 
 Router.post('/create', createValidation(), async (request, response) => {
@@ -65,7 +65,7 @@ Router.patch('/update', VerifyToken, updateValidation(), async (request, respons
     }
 });
 
-Router.delete('/delete/:id', VerifyToken, async (request, response) => {
+Router.delete('/delete/:userTypeID', VerifyToken, async (request, response) => {
     try {
         let { error, message, data } = await Delete(request.params.userTypeID);
         if (!isEmpty(data) && error === false) {
@@ -80,7 +80,6 @@ Router.delete('/delete/:id', VerifyToken, async (request, response) => {
 Router.post('/login/:fcm', async (request, response) => {
     try {
         let { error, message, data } = await Login(request?.body, request?.params?.fcm);
-        console.log(error, message, data);
         console.log(!isEmpty(data) && error === false);
         if (!isEmpty(data) && error === false) {
             console.log(data, message, error);
@@ -92,12 +91,33 @@ Router.post('/login/:fcm', async (request, response) => {
     }
 });
 
-Router.post('/updatepassword', VerifyToken, (req, res) => {
-    return UpdatePassword(req, res);
+Router.patch('/updatepassword', VerifyToken, updatePassWordValidation(), async (request, response) => {
+    try {
+        let hasError = validationResult(request);
+        if (hasError.isEmpty()) {
+            let { error, message, data } = await UpdatePassword(request?.body);
+            if (!isEmpty(data) && error === false) {
+                return sendSuccessMessage(response, message, data);
+            }
+        } else {
+            return sendFailureMessage(response, hasError?.errors[0]?.msg, 422);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error, 500);
+    }
 });
 
-Router.post('/forgotpassword', (req, res) => {
-    return ForgotPassword(req, res);
+Router.patch('/forgotpassword', async (request, response) => {
+    try {
+        let { error, message, data } = await Update(request?.body);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessMessage(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error, 500);
+    }
 });
 
 module.exports = Router;
