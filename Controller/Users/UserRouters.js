@@ -80,7 +80,6 @@ Router.delete('/delete/:id', VerifyToken, async (request, response) => {
 Router.post('/login/:fcm', async (request, response) => {
     try {
         let { error, message, data } = await Login(request?.body, request?.params?.fcm);
-        console.log(error, message, data);
         console.log(!isEmpty(data) && error === false);
         if (!isEmpty(data) && error === false) {
             console.log(data, message, error);

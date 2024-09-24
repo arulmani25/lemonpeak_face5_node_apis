@@ -314,14 +314,12 @@ const UserController = {
      */
     Login: async (requestData, fcm) => {
         try {
-            console.log('fcm', fcm);
             let user = await findOneUser(
                 {
                     $or: [{ username: requestData?.username }, { email: requestData?.email }]
                 },
                 {}
             );
-            console.log('user', user);
             if (isEmpty(user)) {
                 return {
                     error: true,
@@ -329,16 +327,6 @@ const UserController = {
                     data: {}
                 };
             }
-            // const getDbPassword = await findOneUser({
-            //     $or: [{ username: requestData?.username }, { email: requestData?.username }]
-            // });
-            // if(isEmpty(getDbPassword)){
-            //     return {
-            //         error: true,
-            //         message: 'user is not found',
-            //         data: {}
-            //     }
-            // }
             const isValidPassword = await checkPassword(requestData?.password, user?.password);
             if (!isValidPassword) {
                 return {
