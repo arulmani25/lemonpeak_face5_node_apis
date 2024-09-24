@@ -335,8 +335,8 @@ const UserController = {
                 };
             }
             const token = await GenerateToken({
-                user_id: String(user?.user_id),
-                user_type: user?.userType
+                logged_user_id: String(user?.user_id),
+                logged_user_type: user?.userType
             });
             if(token?.error === true) {
                 return {
