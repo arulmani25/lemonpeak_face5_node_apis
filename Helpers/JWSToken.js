@@ -27,9 +27,8 @@ let JWSToken = {
      * @param {*} next
      * @returns
      */
-    VerifyToken: async (request, response, next) => {
+    VerifyToken: async (request, next) => {
         try {
-            // if (!request.headers.authorization) throw new Error('Provide a valid JWT Token');
             if (isEmpty(request?.headers?.authorization)) {
                 return {
                     error: true,
@@ -42,10 +41,10 @@ let JWSToken = {
 
             jwt.verify(token, process.env.SECRET_KEY, async (err, decoded) => {
                 if (err) {
-                    // return response.send({ status: 401, message: 'Invalid Token' });
                     return {
                         error: true,
-                        message: 'Invalid Token'
+                        message: 'Invalid Token',
+                        data: {}
                     };
                 }
                 const loggedUser = { user_id: decoded.user_id };
@@ -55,29 +54,16 @@ let JWSToken = {
                 });
 
                 if (!userExist) {
-                    return response.status(401).json({
-                        status: 401,
-                        message: 'Unauthorized User'
-                    });
+                    return {
+                        error: true,
+                        message: 'Unauthorized User',
+                        data: {}
+                    };
                 }
                 request.loggedUser = decoded;
                 next();
-                // else {
-                //     let loggedUser = { user_id: decoded.user_id };
-
-                //     const userExist = await userModel.findOne({
-                //         user_id: loggedUser.user_id
-                //     });
-
-                //     if (!userExist) {
-                //         return res.send({ status: 401, message: 'UnAuthorized User' });
-                //     }
-                //     req.loggedUser = decoded;
-                //     next();
-                // }
             });
         } catch (error) {
-            // return response.send({ status: 401, message: error.message });
             return {
                 error: true,
                 message: error.message,
