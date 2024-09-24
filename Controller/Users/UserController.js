@@ -13,7 +13,6 @@ const { checkPassword } = require('../../Helpers/passwordvalidation');
 const { sendMailNotification } = require('../../Helpers/mailservice');
 const { createUser, findOneUser, findUser, deleteUser } = require('../../Repositary/Userrepositary');
 const { findOneUserType } = require('../../Repositary/UserTyperepositary');
-const e = require('express');
 
 function hashPassword(password) {
     const saltRounds = 10;
