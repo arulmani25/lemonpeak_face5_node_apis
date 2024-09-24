@@ -25,7 +25,6 @@ const UaerQuery = {
     findOneUser: async (condition, projection) => {
         if (isEmpty(projection)) projection = {};
         let UserData = await UserModel.findOne(condition, projection);
-        console.log('UserData', UserData);
         return UserData;
         // return await UserModel.findOne(condition, projection);
     },

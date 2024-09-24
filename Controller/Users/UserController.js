@@ -13,6 +13,7 @@ const { checkPassword } = require('../../Helpers/passwordvalidation');
 const { sendMailNotification } = require('../../Helpers/mailservice');
 const { createUser, findOneUser, findUser, deleteUser } = require('../../Repositary/Userrepositary');
 const { findOneUserType } = require('../../Repositary/UserTyperepositary');
+const e = require('express');
 
 function hashPassword(password) {
     const saltRounds = 10;
@@ -360,57 +361,54 @@ const UserController = {
      * @param {*} res
      * @returns
      */
-    UpdatePassword: async (req, res) => {
+    UpdatePassword: async (requestData) => {
         try {
-            if (req.body.oldPassword === req.body.newPassword) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Looks Similar To Previous Password',
-                    Data: {},
-                    Code: 404
-                });
+            if (requestData?.oldPassword === requestData?.newPassword) {
+                return {
+                    error: 'Failed',
+                    message: 'Looks Similar To Previous Password',
+                    data: {}
+                };
             }
-            const user = await User.findById(req.body.id);
-            if (!user) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'User not found',
-                    Data: {},
-                    Code: 404
-                });
+            const User = await findOneUser(requestData?.user_id);
+            if (isEmpty(User)) {
+                return {
+                    error: 'Failed',
+                    message: 'User is not found',
+                    data: {}
+                };
             }
-            const isValidPassword = await checkPassword(req.body.oldPassword, user.password);
+            const isValidPassword = await checkPassword(requestData?.oldPassword, User?.password);
             if (!isValidPassword) {
-                return res.status(401).json({
-                    Status: 'Failed',
-                    Message: 'Incorrect Old Password',
-                    Data: {},
-                    Code: 401
-                });
+                return {
+                    error: true,
+                    message: 'Incorrect Password',
+                    deleteUserata: {}
+                };
             }
-            const hashedPassword = await hashPassword(req.body.newPassword);
-
-            const updateNewPassword = await User.findOneAndUpdate(
-                {
-                    _id: new ObjectId(user._id)
-                },
-                { $set: { password: hashedPassword } }
-            );
-
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Password Updated Successfully',
-                Data: {},
-                Code: 200
-            });
+            const hashedPassword = await hashPassword(requestData?.newPassword);
+            User.password = hashedPassword ?? User?.password;
+            User.markModified('password');
+            let result = await User.save();
+            if (!isEmpty(result)) {
+                return {
+                    error: false,
+                    message: 'Password updated successfully',
+                    data: {}
+                };
+            } else {
+                return {
+                    error: true,
+                    message: 'Password updation failure',
+                    data: {}
+                };
+            }
         } catch (error) {
-            console.error('Error fetching user:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -419,21 +417,20 @@ const UserController = {
      * @param {*} res
      * @returns
      */
-    ForgotPassword: async (req, res) => {
+    ForgotPassword: async (requestData) => {
         try {
-            const user = await User.findOne({
-                $or: [{ email: req.body.username }, { username: req.body.username }]
+            const user = await findOneUser({
+                $or: [{ email: requestData?.email }, { username: requestData?.username }]
             });
             if (!user) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'User not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'User is not found',
+                    data: {}
+                };
             }
             const random = `Password@${Math.floor(Math.random() * 9999)}`;
-            const template = `
+            const emailTemplate = `
             <div style="font-family: Helvetica, Arial, sans-serif; min-width: 1000px; overflow:auto; line-height: 2">
               <div style="margin: 50px auto; width: 70%; padding: 20px 0">
                 <div style="border-bottom: 1px solid #eee">
@@ -453,31 +450,40 @@ const UserController = {
               </div>
             </div>
           `;
-            const mailSent = await sendMailNotification(user.email, 'Reset Password', template);
+            const mailSent = await sendMailNotification(user.email, 'Reset Password', emailTemplate);
 
+            if (mailSent?.error === true) {
+                return {
+                    error: 'error',
+                    message: 'Failed to send email',
+                    data: {}
+                };
+            }
             const hashedPassword = await hashPassword(random);
+            let getUser = await findOneUser({ user_id: user?.user_id });
+            getUser.password = hashedPassword ?? getUser?.password;
+            getUser.markModified('password');
+            let result = await getUser.save();
 
-            const updateNewPassword = await User.findOneAndUpdate(
-                {
-                    _id: new ObjectId(user._id)
-                },
-                { $set: { password: hashedPassword } }
-            );
-
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Password Sent To Mail',
-                Data: {},
-                Code: 200
-            });
+            if (!isEmpty(result)) {
+                return {
+                    error: false,
+                    message: 'Password send to mail successfully',
+                    data: {}
+                };
+            } else {
+                return {
+                    error: true,
+                    message: 'Password updation failure',
+                    data: {}
+                };
+            }
         } catch (error) {
-            console.error('Error fetching user:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };

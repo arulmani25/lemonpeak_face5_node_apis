@@ -1,8 +1,6 @@
 const nodemailer = require('nodemailer');
-
 const smtpMailId = process.env.SMTP_MAIL_ID;
 const smtpMailPass = process.env.SMTP_PASSWORD;
-//! use bookmysuites credentials
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -19,21 +17,25 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendMailNotification = async (toAddress, subject, text) => {
-    transporter.sendMail(
-        {
+    try {
+        const info = await transporter.sendMail({
             from: smtpMailId,
-            to: `${toAddress}`,
-            subject: `${subject}`,
-            html: `${text}`
-        },
-        function (error, info) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log(info.response, 'mail sent');
-            }
-        }
-    );
+            to: toAddress,
+            subject: subject,
+            html: text
+        });
+        return {
+            success: true,
+            message: 'Email sent successfully',
+            data: info
+        };
+    } catch (error) {
+        return {
+            error: true,
+            message: error.message,
+            data: {}
+        };
+    }
 };
 
 module.exports = { sendMailNotification };
