@@ -9,7 +9,7 @@ const Utils = {
      */
     getNanoId: () => {
         let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-        let randomId = customAlphabet(alphabet, 10);
+        let randomId = customAlphabet(alphabet, 12);
         return randomId();
     },
 
@@ -70,11 +70,11 @@ const Utils = {
      */
     dateFinder: (data) => {
         let query = {};
-        let toDate = Moment().endOf('day').toDate();
-        let previousDay = Moment().startOf('day').subtract(1, 'day').toDate();
-        let thisWeek = Moment().startOf('week').toDate();
-        let thisMonth = Moment().startOf('month').toDate();
-        let thisYear = Moment().startOf('year').toDate();
+        let toDate = moment().endOf('day').toDate();
+        let previousDay = moment().startOf('day').subtract(1, 'day').toDate();
+        let thisWeek = moment().startOf('week').toDate();
+        let thisMonth = moment().startOf('month').toDate();
+        let thisYear = moment().startOf('year').toDate();
 
         if (data?.date_option) {
             let fromDate;
@@ -96,12 +96,12 @@ const Utils = {
                 }
                 case 'yesterday': {
                     fromDate = previousDay;
-                    toDate = Moment().endOf('day').subtract(1, 'day').toDate();
+                    toDate = moment().endOf('day').subtract(1, 'day').toDate();
                     query = { $gte: fromDate, $lt: toDate };
                     break;
                 }
                 default: {
-                    fromDate = new Date(Moment().startOf('day'));
+                    fromDate = new Date(moment().startOf('day'));
                     query = { $gte: fromDate, $lte: toDate };
                     break;
                 }

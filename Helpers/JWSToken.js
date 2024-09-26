@@ -33,7 +33,7 @@ let JWSToken = {
     VerifyToken: async (request, response, next) => {
         try {
             if (isEmpty(request?.headers?.authorization)) {
-                return response.send ({
+                return response.send({
                     error: true,
                     message: 'Provide a valid JWT Token',
                     data: {}
@@ -44,11 +44,11 @@ let JWSToken = {
 
             jwt.verify(token, process.env.SECRET_KEY, async (err, decoded) => {
                 if (err) {
-                    return {
+                    return response.send({
                         error: true,
                         message: 'Invalid Token',
                         data: {}
-                    };
+                    });
                 }
                 const loggedUser = { logged_user_id: decoded.logged_user_id };
                 const userExist = await findOneUser({
@@ -56,21 +56,21 @@ let JWSToken = {
                 });
 
                 if (!userExist) {
-                    return {
+                    return response.send({
                         error: true,
                         message: 'Unauthorized User',
                         data: {}
-                    };
+                    });
                 }
                 request.loggedUser = decoded;
                 next();
             });
         } catch (error) {
-            return {
+            return response.send({
                 error: true,
                 message: error.message,
                 data: {}
-            };
+            });
         }
     }
 };

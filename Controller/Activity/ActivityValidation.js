@@ -13,17 +13,16 @@ const ActivityValidate = {
         ];
     },
     /**
-     * Update Status
+     * Update
      * @returns
      */
     updateValidation: () => {
-        return [
-            check('activity_id', 'please enter activity_id').trim().notEmpty(),
-            check('title', 'please enter the title').trim().notEmpty(),
-            check('description', 'please enter description').trim().notEmpty(),
-            check('index', 'please enter index').trim().notEmpty()
-        ];
+        return [check('activity_id', 'please enter activity_id').trim().notEmpty()];
     },
+    /**
+     * details validation
+     * @returns
+     */
     detailValidation: () => {
         return [check('activity_id', 'please enter the activity_id').trim().notEmpty()];
     }

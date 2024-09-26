@@ -37,6 +37,7 @@
         "puppeteer": "^22.14.0",
         "puppeteer-core": "^22.14.0",
         "request": "^2.88.2",
+        "sonarqube-scanner": "^4.2.3",
         "vary": "^1.1.2"
     },
     "description": "",
