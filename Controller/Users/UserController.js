@@ -338,7 +338,7 @@ const UserController = {
                 logged_user_id: String(user?.user_id),
                 logged_user_type: user?.userType
             });
-            if(token?.error === true) {
+            if (token?.error === true) {
                 return {
                     error: true,
                     message: token?.message,

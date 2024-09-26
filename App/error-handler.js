@@ -4,7 +4,7 @@ const path = require('path');
 
 // Define a function to log errors with line numbers
 function logErrorWithLineNumber(error, req) {
-    const errorLog = `Timestamp: ${new Date().toISOString()}\n`;
+    let errorLog = `Timestamp: ${new Date().toISOString()}\n`;
     errorLog += `URL: ${req.originalUrl}\n`;
     errorLog += `Method: ${req.method}\n`;
     errorLog += `Error Message: ${error.message}\n`;

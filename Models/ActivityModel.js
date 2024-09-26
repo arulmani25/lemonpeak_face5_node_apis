@@ -10,20 +10,6 @@ const ActivitySchema = new mongoose.Schema({
     index: { type: Number, required: true, unique: true }
 });
 ActivitySchema.plugin(timestamps);
-
-ActivitySchema.pre('save', async function (next) {
-    const Activity = this.constructor;
-    let code = this.title.slice(0, 2).toUpperCase();
-    let suffix = 1;
-
-    while (await Activity.findOne({ code })) {
-        code = code.slice(0, code.length - 1) + suffix;
-        suffix++;
-    }
-    this.code = code;
-    next();
-});
-
 const Activity = mongoose.model('Activity', ActivitySchema);
 
 module.exports = Activity;
