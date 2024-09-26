@@ -25,7 +25,6 @@ const ActivityQuery = {
     findOneActivity: async (condition, projection) => {
         if (isEmpty(projection)) projection = {};
         let ActivityData = await ActivityModel.findOne(condition, projection);
-        console.log(ActivityData);
         return ActivityData;
         // return await ActivityModel.findOne(condition, projection);
     },

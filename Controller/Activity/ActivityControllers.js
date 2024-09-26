@@ -5,8 +5,9 @@ const {
     deleteActivity,
     updateActivity
 } = require('../../Repositary/activityrepositary');
-const { todayDate, endDate, dateFinder, getNanoId, isEmpty } = require('../../Helpers/Utils');
+const { dateFinder, getNanoId, isEmpty } = require('../../Helpers/Utils');
 const SidebarModel = require('../../Models/SidebarModel');
+const ActivityModel = require('../../Models/ActivityModel');
 
 const ActivityController = {
     /**
@@ -31,7 +32,7 @@ const ActivityController = {
                     data: {}
                 };
             }
-            let code = title.slice(0, 2).toUpperCase();
+            let code = requestData?.title.slice(0, 2).toUpperCase();
             let requestObjrect = {
                 activity_id: getNanoId(),
                 title: requestData?.title,
@@ -83,7 +84,9 @@ const ActivityController = {
 
             if (query?.activity_id) queryObject['activity_id'] = query?.activity_id;
             if (query?.status) queryObject['status'] = query?.status;
-            if (query?.user_role) queryObject['description.user_role'] = query?.user_role;
+            if (query?.title) queryObject['title'] = query?.title;
+            if (query?.code) queryObject['code'] = query?.code;
+            if (query?.index) queryObject['index'] = query?.index;
             if (query?.from_date || query?.to_date || query.date_option) {
                 queryObject['createdAt'] = dateFinder(query);
             }
@@ -94,27 +97,27 @@ const ActivityController = {
                 _id: 0,
                 __v: 0
             };
-            let complaintData = await ComplaintModel.find(queryObject, projection)
+            let ActivityData = await ActivityModel.find(queryObject, projection)
                 .limit(limit)
                 .skip((page - 1) * limit)
                 .sort({ _id: -1 })
                 .lean();
-            if (isEmpty(complaintData)) {
+            if (isEmpty(ActivityData)) {
                 return {
                     error: true,
-                    message: 'Complaint list is not found',
+                    message: 'Activity list is not found',
                     data: undefined
                 };
             }
             return {
                 error: false,
-                message: 'Complaint list',
-                data: complaintData
+                message: 'Activity list',
+                data: ActivityData
             };
         } catch (error) {
             return {
-                error: error,
-                message: 'Activity list is not available',
+                error: true,
+                message: error.message,
                 data: undefined
             };
         }
@@ -125,7 +128,6 @@ const ActivityController = {
      * @returns
      */
     Details: async (queryData) => {
-        console.log(queryData);
         if (isEmpty(queryData)) {
             return {
                 error: true,
@@ -134,7 +136,6 @@ const ActivityController = {
             };
         }
         let result = await findOneActivity({ activity_id: queryData });
-        console.log('result', result);
         try {
             if (isEmpty(result)) {
                 return {
@@ -152,7 +153,8 @@ const ActivityController = {
         } catch (error) {
             return {
                 error: true,
-                message: error.message
+                message: error.message,
+                data: undefined
             };
         }
     },
@@ -166,37 +168,33 @@ const ActivityController = {
             if (isEmpty(requestData)) {
                 return {
                     error: true,
-                    message: 'activity data is not empty',
+                    message: 'request value is not empty',
                     data: undefined
                 };
             }
-            if (!requestData?.title || !requestData?.description || !requestData?.index) {
+            let activity = await updateActivity({ activity_id: requestData?.activity_id });
+            if (isEmpty(activity)) {
                 return {
-                    Status: 'Failed',
-                    message: 'Title, description, and index are required fields',
-                    data: {}
+                    error: true,
+                    message: 'activity data is not found',
+                    data: undefined
                 };
             } else {
-                const activity = await findOneActivity({ activity_id: requestData?.activity_id });
-                if (isEmpty(activity)) {
-                    return {
-                        error: true,
-                        message: 'activity data is not found',
-                        data: undefined
-                    };
+                let code;
+                if (requestData?.title) {
+                    code = requestData?.title.slice(0, 2).toUpperCase();
                 }
-                let requestObject = {
-                    activity_id: requestData?.activity_id ?? activity?.activity_id,
-                    title: requestData?.title ?? activity?.title,
-                    description: requestData?.description ?? activity?.description,
-                    index: requestData?.index ?? activity?.index
-                };
-                let UpateResult = await updateActivity(requestObject);
-                if (!isEmpty(UpateResult)) {
+                activity.title = requestData?.title ?? activity?.title;
+                activity.code = code ?? activity?.code;
+                activity.description = requestData?.description ?? activity?.description;
+
+                activity.markModified(['title', 'code', 'description']);
+                let result = await activity.save();
+                if (!isEmpty(result)) {
                     return {
                         error: false,
                         message: 'activity updated successful',
-                        data: UpateResult
+                        data: result
                     };
                 } else {
                     return {
@@ -209,7 +207,8 @@ const ActivityController = {
         } catch (error) {
             return {
                 error: true,
-                message: error.message
+                message: error.message,
+                data: undefined
             };
         }
     },
@@ -219,8 +218,6 @@ const ActivityController = {
      * @returns
      */
     Delete: async (activity_id) => {
-        console.log(activity_id);
-        console.log(1234);
         try {
             if (isEmpty(activity_id)) {
                 return { error: true, message: 'Unauthorized access.' };
@@ -229,14 +226,19 @@ const ActivityController = {
             if (isEmpty(activity)) {
                 return { error: false, message: 'Invalid Activity!' };
             } else {
-                let activity = await findActicity({ activity_id: activity_id });
-                let deleteProduct = await deleteActivity({ activity_id: activity?.activity_id });
+                let deleteProduct = await deleteActivity({ activity_id: activity[0]?.activity_id });
                 if (deleteProduct) {
                     return { error: false, data: {}, message: 'Product deleted successfully!' };
                 }
                 return { error: false, data: {}, message: 'Something went wrong!' };
             }
-        } catch (error) {}
+        } catch (error) {
+            return {
+                error: true,
+                message: error.message,
+                data: undefined
+            };
+        }
     }
 };
 
