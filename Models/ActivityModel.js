@@ -6,7 +6,6 @@ const ActivitySchema = new mongoose.Schema({
     title: { type: String, required: true },
     code: { type: String, unique: true },
     description: { type: String, required: true },
-    date: { type: Date, default: Date.now },
     status: { type: String, enum: ['active', 'inactive', 'deleted'], default: 'active' },
     index: { type: Number, required: true, unique: true }
 });

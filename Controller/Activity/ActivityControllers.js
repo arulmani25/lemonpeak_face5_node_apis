@@ -31,10 +31,11 @@ const ActivityController = {
                     data: {}
                 };
             }
+            let code = title.slice(0, 2).toUpperCase();
             let requestObjrect = {
                 activity_id: getNanoId(),
                 title: requestData?.title,
-                code: requestData?.code,
+                code: requestData?.code ?? code,
                 description: requestData?.description,
                 date: requestData?.date,
                 status: requestData?.status,
