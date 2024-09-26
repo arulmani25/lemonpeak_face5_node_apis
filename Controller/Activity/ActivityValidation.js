@@ -16,7 +16,7 @@ const ActivityValidate = {
      * Update Status
      * @returns
      */
-    updateStatusValidation: () => {
+    updateValidation: () => {
         return [
             check('activity_id', 'please enter activity_id').trim().notEmpty(),
             check('title', 'please enter the title').trim().notEmpty(),

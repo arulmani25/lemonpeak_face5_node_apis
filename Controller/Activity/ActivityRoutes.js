@@ -5,7 +5,7 @@ const { isEmpty } = require('../../Helpers/Utils');
 const { VerifyToken, GenerateToken } = require('../../Helpers/JWSToken');
 const { sendFailureMessage, sendSuccessData } = require('../../App/Responder');
 const { validationResult } = require('express-validator');
-const { createValidation, updateStatusValidation, detailValidation } = require('./ActivityValidation');
+const { createValidation, updateValidation, detailValidation } = require('./ActivityValidation');
 
 Router.post('/create', VerifyToken, createValidation(), async (request, response) => {
     try {
@@ -25,7 +25,7 @@ Router.post('/create', VerifyToken, createValidation(), async (request, response
     }
 });
 
-Router.get('/activity/list/:activityId?', VerifyToken, async (request, response) => {
+Router.get('/list/:activityId?', VerifyToken, async (request, response) => {
     try {
         let hasErrors = validationResult(request);
         if (hasErrors.isEmpty()) {
@@ -42,7 +42,7 @@ Router.get('/activity/list/:activityId?', VerifyToken, async (request, response)
     }
 });
 
-Router.get('/activity/detail/:activityId?', VerifyToken, async (request, response) => {
+Router.get('/details/:activityId?', VerifyToken, detailValidation(), async (request, response) => {
     try {
         console.log(request?.params?.activityId);
         let { error, message, data } = await Details(request?.params?.activityId);
@@ -55,7 +55,7 @@ Router.get('/activity/detail/:activityId?', VerifyToken, async (request, respons
     }
 });
 
-Router.patch('/activity/updateActivities', VerifyToken, async (request, response) => {
+Router.patch('/update', VerifyToken, async (request, response) => {
     try {
         let hasError = validationResult(request);
         if (hasError.isEmpty()) {
@@ -72,7 +72,7 @@ Router.patch('/activity/updateActivities', VerifyToken, async (request, response
     }
 });
 
-Router.delete('/activity/delete/:activityId', VerifyToken, async (request, response) => {
+Router.delete('/delete/:activityId', VerifyToken, async (request, response) => {
     try {
         let { error, message, data } = await Delete(request.params.activityId);
         if (error === false) {

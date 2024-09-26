@@ -86,7 +86,7 @@ const UserController = {
             };
             const newUser = await createUser(requestObject);
             return {
-                status: false,
+                error: false,
                 message: 'User created successfully',
                 debuggerata: newUser
             };
