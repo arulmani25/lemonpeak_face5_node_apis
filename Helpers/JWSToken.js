@@ -30,14 +30,14 @@ let JWSToken = {
      * @param {*} next
      * @returns
      */
-    VerifyToken: async (request, _response, next) => {
+    VerifyToken: async (request, response, next) => {
         try {
             if (isEmpty(request?.headers?.authorization)) {
-                return {
+                return response.send ({
                     error: true,
                     message: 'Provide a valid JWT Token',
                     data: {}
-                };
+                });
             }
 
             const token = request.headers.authorization?.split(' ')[1];
