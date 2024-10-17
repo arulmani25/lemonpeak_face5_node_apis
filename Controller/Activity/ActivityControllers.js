@@ -19,7 +19,7 @@ const ActivityController = {
         try {
             if (!requestData?.title || !requestData?.description || !requestData?.index) {
                 return {
-                    error: 'Failed',
+                    error: true,
                     message: 'title, description, and index are required fields',
                     data: {}
                 };
@@ -27,7 +27,7 @@ const ActivityController = {
             const existingActivity = await findOneActivity({ index: requestData?.index });
             if (existingActivity) {
                 return {
-                    error: 'Failed',
+                    error: true,
                     message: 'duplicate index found. Please choose a unique index.',
                     data: {}
                 };
@@ -66,7 +66,7 @@ const ActivityController = {
             return {
                 error: true,
                 message: error.message,
-                data: {}
+                data: undefined
             };
         }
     },
