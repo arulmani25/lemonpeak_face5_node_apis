@@ -3,138 +3,166 @@ const Router = Express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const mongoose = require('mongoose');
-const UserTypeLocal = '../../Models/UserTypeModel';
-const UserType = require(UserTypeLocal);
-const AccessConfigLocal = '../../Models/AccessConfigModel';
-const AccessConfig = require(AccessConfigLocal);
+const AccessConfigModel = require('../../Models/AccessConfigModel');
+const { isEmpty, getNanoId } = require('../../Helpers/Utils');
+const {
+    createAccessConfig,
+    findOneAccessConfig,
+    updateAccessConfig,
+    deleteAccessConfig
+} = require('../../Repositary/accessConfigrepositary');
+const { findOneUserType } = require('../../Repositary/UserTyperepositary');
 
 const AccessConfiguration = {
     /**
-     * create access configuration
-     * @param {*} req
-     * @param {*} res
+     * create access_config
+     * @param {*} requestData
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (requestData) => {
         try {
-            const existingAccess = await AccessConfig.findOne({
-                role: new mongoose.Types.ObjectId(req.body.role)
-            });
-            if (existingAccess) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'Role Configuration already exists',
-                    Data: {},
-                    Code: 400
-                });
+            const existingAccess = await findOneAccessConfig({ role: requestData?.user_type_id });
+            if (isEmpty(existingAccess)) {
+                return {
+                    error: true,
+                    message: 'Role Configuration already exists',
+                    data: {}
+                };
             }
-            const newAccess = await AccessConfig.create(req.body);
-            const getRole = await UserType.findById(req.body.role);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: `Acces configuration for the role ${getRole.name} created successfully`,
-                Data: newAccess,
-                Code: 200
-            });
+            let requestObject = {
+                access_config_id: getNanoId(),
+                access_config: requestData?.access_config,
+                user_type_id: requestData?.user_type_id ?? '',
+                sideBar: requestData?.sideBar ?? []
+            };
+            const newAccess = await createAccessConfig(requestObject);
+            const getRole = await findOneUserType(requestData?.user_type_id);
+            return {
+                error: false,
+                message: `Acces configuration for the role ${getRole?.name} created successfully`,
+                data: newAccess
+            };
         } catch (error) {
-            console.error('Error creating access:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error?.message,
+                Data: undefined
+            };
         }
     },
     /**
-     * get list_by_role
-     * @param {*} req
-     * @param {*} res
+     * get role
+     * @param {*} loggedUser
      * @returns
      */
-    listbyrole: async (req, res) => {
+    ListByRole: async (loggedUser) => {
         try {
-            const getIdByRole = await UserType.findOne({
-                name: req.loggedUser.user_type
-            });
-            const getConfigs = await AccessConfig.findOne({
-                role: new mongoose.Types.ObjectId(getIdByRole._id)
-            });
-
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Access Configuration Retrieved Successfully',
-                Data: getConfigs,
-                Code: 200
-            });
+            const getIdByRole = await findOneUserType({ name: loggedUser?.user_type });
+            if (isEmpty(getIdByRole)) {
+                return {
+                    error: true,
+                    message: 'user_type is not found',
+                    data: {}
+                };
+            }
+            const getConfigs = await findOneAccessConfig({ role: getIdByRole?.user_type_id });
+            if (isEmpty(getConfigs)) {
+                return {
+                    error: true,
+                    message: 'Access_Configuration is not found',
+                    data: {}
+                };
+            }
+            return {
+                error: false,
+                moduleessage: 'Access Configuration Retrieved Successfully',
+                data: getConfigs
+            };
         } catch (error) {
-            console.error('Error fetching Access:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error?.message,
+                data: {}
+            };
         }
     },
     /**
      * get access_config list
-     * @param {*} req
-     * @param {*} res
+     * @param {*} query
+     * @param {*} access_config_id
      * @returns
      */
-    list: async (req, res) => {
+    List: async (query, access_config_id) => {
         try {
-            const getConfigs = await AccessConfig.find({});
+            let queryObject = {};
+            let limit = query?.limit ? Number.parseInt(query?.limit) : 20;
+            let page = query?.page ? Number.parseInt(query?.page) : 1;
 
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Access Configuration Retrieved Successfully',
-                Data: getConfigs,
-                Code: 200
-            });
+            if (query?.access_config_id) queryObject['access_config_id'] = query?.access_config_id;
+            if (query?.access_config) queryObject['access_config'] = query?.access_config;
+            if (query?.user_type_id) queryObject['user_type_id'] = query?.user_type_id;
+            if (query?.from_date || query?.to_date || query.date_option) {
+                queryObject['createdAt'] = dateFinder(query);
+            }
+            if (access_config_id) {
+                queryObject['access_config_id'] = access_config_id;
+            }
+            let projection = {
+                _id: 0,
+                __v: 0
+            };
+            let AccessConfigData = await AccessConfigModel.find(queryObject, projection)
+                .limit(limit)
+                .skip((page - 1) * limit)
+                .sort({ _id: -1 })
+                .lean();
+            if (isEmpty(AccessConfigData)) {
+                return {
+                    error: true,
+                    message: 'AccessConfig list is not found',
+                    data: undefined
+                };
+            }
+            return {
+                error: false,
+                message: 'AccessConfig list',
+                data: AccessConfigData
+            };
         } catch (error) {
-            console.error('Error fetching Access:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: undefined
+            };
         }
     },
     /**
-     * get access_config details
-     * @param {*} req
-     * @param {*} res
+     * details
+     * @param {*} accessConfigId
      * @returns
      */
-    Details: async (req, res) => {
+    Details: async (accessConfigId) => {
         try {
-            const accessConfig = await AccessConfig.findById(req?.params?.id);
+            const accessConfig = await findOneAccessConfig({ access_config_id: accessConfigId });
             if (!accessConfig) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Access config not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Access config not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Access Configuration retrieved successfully',
-                Data: accessConfig,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Access Configuration retrieved successfully',
+                data: accessConfig
+            };
         } catch (error) {
-            console.error('Error fetching Access Config:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error,
+                message,
+                data: {}
+            };
         }
     },
     /**
@@ -143,31 +171,31 @@ const AccessConfiguration = {
      * @param {*} res
      * @returns
      */
-    update: async (req, res) => {
+    Update: async (requestData) => {
         try {
-            const updatedAccess = await AccessConfig.findByIdAndUpdate(req?.params?.id, req?.body, { new: true }); // Return updated document
+            const updatedAccess = await AccessConfig.findByIdAndUpdate(
+                requestData?.params?.accessConfigId,
+                requestData?.body,
+                { new: true }
+            );
             if (!updatedAccess) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Access Config not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Access Config not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Access Configuration updated successfully',
-                Data: updatedAccess,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Access Configuration updated successfully',
+                data: updatedAccess
+            };
         } catch (error) {
-            console.error('Error updating Access config:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -176,31 +204,27 @@ const AccessConfiguration = {
      * @param {*} res
      * @returns
      */
-    deleteData: async (req, res) => {
+    Delete: async (requestData) => {
         try {
-            const deletedConfig = await AccessConfig.findByIdAndDelete(req.params.id);
+            const deletedConfig = await AccessConfig.findByIdAndDelete(requestData?.params?.accessConfigId);
             if (!deletedConfig) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Access Configuration not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Access Configuration not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Access Configuration deleted successfully',
-                Data: deletedConfig,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Access Configuration deleted successfully',
+                data: deletedConfig
+            };
         } catch (error) {
-            console.error('Error deleting Access config:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };

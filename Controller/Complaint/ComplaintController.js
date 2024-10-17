@@ -1,15 +1,24 @@
 const express = require('express');
 const Router = express.Router();
-const { VerifyToken } = require('../Helpers/JWSToken');
-const { isEmpty, getNanoId, dateFinder } = require('../Helpers/Utils');
+const ComplaintModel = require('../Models/ComplaintModel');
+const { VerifyToken } = require('../../Helpers/JWSToken');
+const { isEmpty, getNanoId, dateFinder } = require('../../Helpers/Utils');
+const { createValidation } = require('../Validators/ComplaintValidation');
+const {
+    createComplaint,
+    findOneComplaint,
+    updateComplaint,
+    deleteComplaint,
+    findComplaint
+} = require('../../Repositary/Complaintrepositary');
+const { findOneUser } = require('../../Repositary/Userrepositary');
 const { validationResult } = require('express-validator');
 const moment = require('moment');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const AssetModel = require('../Models/AssetModel');
-const { createAsset, findAsset, findOneAsset, updateAsset, deleteAsset } = require('../Repositary/assetrpositary');
+const { complaintPdf } = require('../Helpers/ComplaintPdfFile');
 
-Router.post('/create', VerifyToken, async (request, response) => {
+Router.post('/create', createValidation(), VerifyToken, async (request, response) => {
     try {
         let hasErrors = validationResult(request);
         if (!hasErrors.isEmpty()) {
@@ -20,47 +29,46 @@ Router.post('/create', VerifyToken, async (request, response) => {
         }
         let requestData = request?.body;
 
+        const currentDate = moment();
+        let count = '1'.padStart(3, '0');
+        requestData.complaint_no = `FACE5-CMP-${currentDate.format('YY-MM-DD')}-${count}`;
+
+        let { loggedUser } = request;
         let RequestObject = {
-            asset_id: getNanoId(),
-            asset_tag: requestData?.asset_tag,
-            title: requestData?.title,
-            status: requestData?.status,
-            type: request?.type,
-            address: {
-                location: {
-                    line_1: requestData?.location?.line_1,
-                    line_2: requestData?.location?.line_2,
-                    city: requestData?.location?.city,
-                    state: requestData?.location?.state,
-                    country: requestData?.location?.country,
-                    zipcode: requestData?.location?.zipcode
-                },
-                sub_location: {
-                    line_1: requestData?.sub_location?.line_1,
-                    line_2: requestData?.sub_location?.line_2,
-                    city: requestData?.sub_location?.city,
-                    state: requestData?.sub_location?.state,
-                    country: requestData?.sub_location?.country,
-                    zipcode: requestData?.sub_location?.zipcode
-                }
+            complaint_id: getNanoId(),
+            complaint_no: requestData.complaint_no,
+            description: {
+                user_id: loggedUser?.user_id,
+                user_role: loggedUser?.user_type?.name,
+                complaint: requestData?.complaint
             },
-            is_active: requestData?.is_active,
-            qrcode: ''
+            checklist: {
+                activity_object_id: requestData?.activity_object_id,
+                activity_id: requestData?.activity_id ?? '',
+                field_name: requestData?.field_name
+            },
+            location: requestData?.location,
+            sub_location: requestData?.sub_location,
+            status: requestData?.status,
+            priority: requestData?.priority,
+            assigned_to: requestData?.assigned_to,
+            image: requestData?.image
         };
-        let Asset = await createAsset(RequestObject);
-        if (!Asset) {
+        let Complaint = await createComplaint(RequestObject);
+        if (!Complaint) {
             return response.send({
                 error: true,
-                message: 'Asset create is failure',
+                message: 'Complaint create is failure',
                 data: {}
             });
         }
         return response.send({
             error: false,
-            message: 'Asset created successfully',
-            data: Asset
+            message: 'Complaint created successfully',
+            data: Complaint
         });
     } catch (error) {
+        console.log('error', error);
         return response.send({
             error: true,
             message: error.Message,
@@ -90,7 +98,7 @@ Router.get('/list/:complaintId?', VerifyToken, async (request, response) => {
             _id: 0,
             __v: 0
         };
-        let complaintData = await AssetModel.find(queryObject, projection)
+        let complaintData = await ComplaintModel.find(queryObject, projection)
             .limit(limit)
             .skip((page - 1) * limit)
             .sort({ _id: -1 })
@@ -129,7 +137,7 @@ Router.get('/details/:complaintId?', VerifyToken, async (request, response) => {
         _id: 0,
         __v: 0
     };
-    let result = await findOneAsset({ complaint_id: queryData }, projection);
+    let result = await findOneComplaint({ complaint_id: queryData }, projection);
     try {
         if (isEmpty(result)) {
             return response.send({
@@ -162,7 +170,7 @@ Router.patch('/update', VerifyToken, async (request, response) => {
                 data: undefined
             });
         }
-        let complaint = await updateAsset({ complaint_id: RequestData?.complaint_id });
+        let complaint = await updateComplaint({ complaint_id: RequestData?.complaint_id });
         if (isEmpty(complaint)) {
             return response.send({
                 error: true,
