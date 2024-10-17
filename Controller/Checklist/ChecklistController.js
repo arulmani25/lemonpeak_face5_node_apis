@@ -7,11 +7,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const CheckListModel = require('../../Models/ChecklistModel');
 const { isEmpty, getNanoId, dateFinder } = require('../../Helpers/Utils');
 const { findOneActivity } = require('../../Repositary/activityrepositary');
-const {
-    createChecklist,
-    findChecklist,
-    deleteChecklist
-} = require('../../Repositary/Checklistrepositary');
+const { createChecklist, findChecklist, deleteChecklist } = require('../../Repositary/Checklistrepositary');
 
 const CheckList = {
     /**

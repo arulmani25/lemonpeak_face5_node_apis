@@ -24,7 +24,7 @@ Router.post('/create', VerifyToken, createValidation(), async (request, response
 
 Router.get('/list', VerifyToken, async (request, response) => {
     try {
-        let { error, message, data } = await List(request?.body);
+        let { error, message, data } = await List(request);
         if (!isEmpty(data) && error === false) {
             return sendSuccessData(response, message, data);
         }
