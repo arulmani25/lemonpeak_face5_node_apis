@@ -5,93 +5,99 @@ Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
 const moment = require('moment');
 const Attendance = require('../../Models/AttendanceModel');
+const {
+    createAttendance,
+    findAttendance,
+    findOneAttendance,
+    updateAttendance,
+    deleteAttendance
+} = require('../../Repositary/attendancerepositary');
+const { getNanoId, isEmpty } = require('../../Helpers/Utils');
 
 const AttendanceController = {
     /**
      * create attendance
-     * @param {*} req
-     * @param {*} res
+     * @param {*} requestData
      * @returns
      */
-    createAttendance: async (req, res) => {
+    Create: async (requestData) => {
         try {
-            if (!req.body.userPhoneNumber || !req.body.location || !req.body.lat || !req.body.lan) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'mobile number, location,lat and lan are required fields',
-                    Data: {},
-                    Code: 400
-                });
-            }
-
-            const record = await Attendance.create(req.body);
-
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Attendance submitted successfully',
-                Data: record,
-                Code: 200
-            });
+            let requestObject = {
+                attendance_id: getNanoId(),
+                userName: requestData?.userName ?? '',
+                userPhoneNumber: requestData?.userPhoneNumber,
+                checkInTime: requestData?.checkInTime ?? '',
+                checkOutTime: requestData?.checkOutTime ?? '',
+                lat: requestData?.lat,
+                lan: requestData?.lan,
+                location: requestData?.location
+            };
+            const record = await createAttendance(requestObject);
+            return {
+                error: false,
+                message: 'Attendance submitted successfully',
+                data: record
+            };
         } catch (error) {
-            console.log('=====error', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
-     * get last_status
-     * @param {*} req
-     * @param {*} res
+     * Get last_status
+     * @param {*} query
      * @returns
      */
-    Getlaststatus: async (req, res) => {
+    Getlaststatus: async (query) => {
         try {
+            if (isEmpty(query)) {
+                return {
+                    error: true,
+                    message: 'request value is empty',
+                    data: {}
+                };
+            }
             const startDate = moment();
             const attendanceList = await Attendance.find({
-                userPhoneNumber: req.query.userPhoneNumber,
+                userPhoneNumber: query?.userPhoneNumber,
                 createdAt: {
                     $gte: new Date(startDate.startOf('days')),
                     $lte: new Date(startDate.endOf('days'))
                 }
             });
-            const data = attendanceList.length ? attendanceList.at(-1) : [];
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'record retrieved successfully',
-                Data: data,
-                Code: 200
-            });
+            const result = attendanceList.length ? attendanceList.at(-1) : [];
+            return {
+                error: false,
+                message: 'record retrieved successfully',
+                data: result
+            };
         } catch (error) {
-            console.error('Error fetching activities:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
      * get attendance list
-     * @param {*} req
-     * @param {*} res
+     * @param {*} requestData
      * @returns
      */
-    List: async (req, res) => {
+    List: async (requestData) => {
         try {
-            const startDate = moment(req?.body?.fromDate);
-            const endDate = moment(req?.body?.toDate);
+            const startDate = moment(requestData?.fromDate);
+            const endDate = moment(requestData?.toDate);
 
-            const data = await Attendance.aggregate([
+            const result = await Attendance.aggregate([
                 {
                     $match:
-                        req.body.userPhoneNumber && req.body.fromDate && req.body.toDate
+                        requestData?.userPhoneNumber && requestData?.fromDate && requestData?.toDate
                             ? {
-                                  userPhoneNumber: req.body.userPhoneNumber,
+                                  userPhoneNumber: requestData?.userPhoneNumber,
                                   createdAt: {
                                       $gte: new Date(startDate.startOf('days')),
                                       $lte: new Date(endDate.endOf('days'))
@@ -136,7 +142,7 @@ const AttendanceController = {
             ]);
 
             const finalRecord = [];
-            data.forEach((iterator) => {
+            result.forEach((iterator) => {
                 finalRecord.push({
                     date: iterator.date,
                     userName: iterator.firstRecord.userName,
@@ -148,39 +154,36 @@ const AttendanceController = {
                 });
             });
 
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Attendance retrieved successfully',
-                Data: finalRecord,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Attendance retrieved successfully',
+                data: finalRecord
+            };
         } catch (error) {
-            console.error('Error fetching attendance:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: 'Failed',
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
-     * emp_list
-     * @param {*} req
+     * EmpList
+     * @param {*} requestData
      * @param {*} res
      * @returns
      */
-    EmpList: async (req, res) => {
+    EmpList: async (requestData) => {
         try {
-            const startDate = moment(req?.body?.fromDate);
-            const endDate = moment(req?.body?.toDate);
+            const startDate = moment(requestData?.fromDate);
+            const endDate = moment(requestData?.toDate);
 
             const activity = await Attendance.aggregate([
                 {
                     $match:
-                        req.body.userPhoneNumber && req.body.fromDate && req.body.toDate
+                        requestData?.userPhoneNumber && requestData?.fromDate && requestData?.toDate
                             ? {
-                                  userPhoneNumber: req.body.userPhoneNumber,
+                                  userPhoneNumber: requestData?.userPhoneNumber,
                                   createdAt: {
                                       $gte: new Date(startDate.startOf('days')),
                                       $lte: new Date(endDate.endOf('days'))
@@ -198,20 +201,17 @@ const AttendanceController = {
                 }
             ]);
 
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Attendance retrieved successfully',
-                Data: activity,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Attendance retrieved successfully',
+                data: activity
+            };
         } catch (error) {
-            console.error('Error fetching attendance:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };
