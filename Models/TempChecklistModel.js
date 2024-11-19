@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 const timestamps = require('mongoose-timestamp');
-const objectId = mongoose.Types.ObjectId;
 
 const Temp_checklistSchema = new mongoose.Schema({
     temp_checklist_id: { type: String },
-    job_id: { type: objectId, ref: 'jobDetails' },
+    job_deteils_id: { type: String },
     data_store: [
         {
             index: { type: Number },
@@ -17,9 +16,9 @@ const Temp_checklistSchema = new mongoose.Schema({
             field_update_reason: { type: String },
             date_of_create: { type: Date },
             date_of_update: { type: Date },
-            created_by: { type: objectId },
-            updated_by: { type: objectId },
-            main_activity_id: { type: String },
+            // created_by: { type: objectId },
+            // updated_by: { type: objectId },
+            activity_id: { type: String },
             sub_activity_id: { type: String },
             delete_status: { type: Boolean },
             field_required: { type: Boolean }

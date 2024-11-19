@@ -46,8 +46,16 @@ Router.get('/details/:checklistID?', VerifyToken, async (request, response) => {
     }
 });
 
-Router.post('/updatechecklist/:id', VerifyToken, (req, res) => {
-    return Update(req, res);
+Router.post('/updatechecklist/:id', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Update(request?.params?.checklistID);
+        if (error === false) {
+            return sendSuccessMessage(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
 Router.delete('/delete/:checklistID?', VerifyToken, async (request, response) => {

@@ -38,7 +38,6 @@ Router.get('/list/:userTypeID?', VerifyToken, async (request, response) => {
 
 Router.get('/details/:userTypeID', VerifyToken, async (request, response) => {
     try {
-        console.log(request?.params?.activityId);
         let { error, message, data } = await Details(request?.params?.userTypeID);
         if (!isEmpty(data) && error === false) {
             return sendSuccessData(response, message, data);

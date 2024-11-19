@@ -1,26 +1,66 @@
 const Express = require('express');
 const Router = Express.Router();
-const { create, List, SubmittedjobList, Update, Delete } = require('./SubmittedChecklistController');
+const { Create, List, Submittedjob, Update, Delete } = require('./SubmittedChecklistController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
-Router.post('/submit', VerifyToken, (req, res) => {
-    return create(req, res);
+Router.post('/submit', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Create(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/getlist', VerifyToken, (req, res) => {
-    return List(req, res);
+Router.get('/list', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await List(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.put('/update/:id', VerifyToken, (req, res) => {
-    return Update(req, res);
+Router.patch('/update/:id', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Update(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.delete('/cheklist/:id', VerifyToken, (req, res) => {
-    return Delete(req, res);
+Router.delete('/delete/:id', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Delete(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/listsubmittedjobs', VerifyToken, (req, res) => {
-    return SubmittedjobList(req, res);
+Router.get('/completed_job', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Submittedjob(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
 module.exports = Router;

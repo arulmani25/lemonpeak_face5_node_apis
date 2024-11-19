@@ -12,13 +12,17 @@ const FileUpload = {
      * @param {*} res
      * @returns
      */
-    Upload: async (req, res) => {
-        const payload = req.files;
+    Upload: async (requestData, res) => {
+        const payload = requestData?.files;
         if (Object.keys(payload?.files).length == 0) {
-            return res.status(400).send('No files were uploaded.');
+            return {
+                error: true,
+                message: 'No files were uploaded.',
+                data: {}
+            };
         }
 
-        const sampleFile = payload.files;
+        const sampleFile = payload?.files;
         const filePath = [];
         if (sampleFile.length > 1) {
             sampleFile.forEach((element) => {
@@ -37,12 +41,11 @@ const FileUpload = {
             });
             filePath.push(path);
         }
-        return res.status(200).json({
-            Status: 'Success',
-            Message: 'Upload success',
-            Data: filePath,
-            Code: 200
-        });
+        return {
+            error: true,
+            message: 'Upload success',
+            data: filePath
+        };
     }
 };
 

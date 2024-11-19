@@ -6,19 +6,14 @@ const JobDetailsSchema = new mongoose.Schema({
     jobTitle: { type: String },
     jobId: { type: String },
     description: { type: String },
-    clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClientManagement' },
-    siteId: { type: mongoose.Schema.Types.ObjectId, ref: 'SiteManagement' },
-    activityId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity'
+    client_id: { type: String },
+    site_id: { type: String },
+    activity_id: { type: String },
+    sub_activity_id: {
+        type: String
     },
-    subActivityId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subactivity'
-    },
-    checklistId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'submittedChecklist'
+    submitted_checklist_id: {
+        type: String
     },
     jobDate: { type: Date },
     jobStatus: {
@@ -35,7 +30,7 @@ const JobDetailsSchema = new mongoose.Schema({
     contactName: { type: String },
     techName: { type: String },
     techNumber: { type: String },
-    is_master: { type: Boolean, default: false } // used for run cron to schedule job
+    is_master: { type: Boolean, default: false }
 });
 JobDetailsSchema.plugin(timestamps);
 const jobManagementModel = mongoose.model('jobDetails', JobDetailsSchema);

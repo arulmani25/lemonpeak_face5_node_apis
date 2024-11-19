@@ -139,7 +139,7 @@ const ClientManagement = {
         } catch (error) {
             return {
                 error: true,
-                message: 'Internal Server Error',
+                message: error.message,
                 data: {}
             };
         }
@@ -215,36 +215,36 @@ const ClientManagement = {
      * @param {*} res
      * @returns
      */
-    UpdateStatus: async (req, res) => {
+    UpdateStatus: async (query, clientID) => {
         try {
-            // Basic input validation
-            const clientStatus = await ClientManagementModel.findById(req.params.id);
-            if (!clientStatus) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
-                });
+            const getClient = await findOneClientManagement({ client_id: clientID });
+            if (isEmpty(getClient)) {
+                return {
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
+                };
             }
-
-            const clientStatusUpdate = await ClientManagementModel.findOneAndUpdate(
-                { _id: req.params.id },
-                { $set: { status: req.body.status } }
-            );
-
-            return res.json({
-                Status: 'Success',
-                Message: 'Client Status updated successfully',
-                Data: {},
-                Code: 200
-            });
+            getClient.Status = query?.status ?? getClient?.Status;
+            getClient.markModified('status');
+            let result = await getClient.save();
+            if (!result) {
+                return {
+                    error: true,
+                    message: 'Client is not updated',
+                    data: {}
+                };
+            }
+            return {
+                error: false,
+                message: 'Client updated successfully',
+                data: result
+            };
         } catch (error) {
             return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
+                error: true,
+                message: error.message,
+                data: {}
             });
         }
     },
@@ -260,10 +260,9 @@ const ClientManagement = {
             const getclient = await ClientManagementModel.findById(req.params.id);
             if (!getclient) {
                 return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
                 });
             }
 
@@ -273,17 +272,15 @@ const ClientManagement = {
             );
 
             return res.json({
-                Status: 'Success',
-                Message: 'Client Site Linked successfully',
-                Data: {},
-                Code: 200
+                error: false,
+                message: 'Client Site Linked successfully',
+                data: {}
             });
         } catch (error) {
             return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
+                error: true,
+                message: error.message,
+                data: {}
             });
         }
     },
@@ -299,10 +296,9 @@ const ClientManagement = {
             const getclient = await ClientManagementModel.findById(req.params.id);
             if (!getclient) {
                 return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
                 });
             }
 
@@ -310,19 +306,23 @@ const ClientManagement = {
                 { _id: req.params.id },
                 { $pull: { siteDetails: req.body.siteId } }
             );
-
+            if (isEmpty(clientSiteUnLink)) {
+                return res.json({
+                    error: true,
+                    message: "Client site doesn't unLinked",
+                    data: {}
+                });
+            }
             return res.json({
-                Status: 'Success',
-                Message: 'Client Site UnLinked successfully',
-                Data: {},
-                Code: 200
+                error: false,
+                message: 'Client Site UnLinked successfully',
+                data: {}
             });
         } catch (error) {
             return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
+                error: true,
+                message: error.message,
+                data: {}
             });
         }
     },

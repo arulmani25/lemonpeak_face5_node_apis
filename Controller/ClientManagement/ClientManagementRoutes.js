@@ -58,8 +58,16 @@ Router.post('/update', VerifyToken, (req, res) => {
     return Update(req, res);
 });
 
-Router.put('/updatestatus/:id', VerifyToken, (req, res) => {
-    return UpdateStatus(req, res);
+Router.put('/updatestatus/:clientID', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await UpdateStatus(request?.query, request?.params?.clientID);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
 Router.put('/linksite/:id', VerifyToken, (req, res) => {

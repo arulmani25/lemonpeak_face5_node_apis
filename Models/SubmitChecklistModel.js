@@ -1,10 +1,9 @@
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const timestamps = require('mongoose-timestamp');
+const mongoose = require('mongoose');
 
 const SubmittedChecklistSchema = new mongoose.Schema({
     submitted_checklist_id: { type: String },
-    job_id: { type: ObjectId, ref: 'jobDetails' },
+    job_deteils_id: { type: String },
     start_time: { type: String },
     end_time: { type: String },
     submittedData: [
@@ -15,7 +14,7 @@ const SubmittedChecklistSchema = new mongoose.Schema({
     ],
     images: [],
     is_active: { type: Boolean, default: true },
-    submitted_by: { type: ObjectId, ref: 'User' },
+    user_id: { type: String },
     jobInfo: { type: Object }
 });
 SubmittedChecklistSchema.plugin(timestamps);

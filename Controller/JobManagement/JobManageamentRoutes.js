@@ -1,7 +1,7 @@
 const Express = require('express');
 const Router = Express.Router();
 const {
-    create,
+    Create,
     List,
     Details,
     Update,
@@ -14,49 +14,138 @@ const {
     DeleteJobManagement
 } = require('./JobManagementController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
+const { sendFailureMessage, sendSuccessData, sendSuccessData } = require('../../App/Responder');
 
-Router.post('/create', VerifyToken, (req, res) => {
-    return create(req, res);
+Router.post('/create', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Create(request?.body);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/list', VerifyToken, (req, res) => {
-    return List(req, res);
+Router.get('/list', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await List(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/job/:id', VerifyToken, (req, res) => {
-    return Details(req, res);
+Router.get('/details/:id', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Details(request?.params?.id);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/update', VerifyToken, (req, res) => {
-    return Update(req, res);
+Router.patch('/update', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Update(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.put('/updatestatus/:id', VerifyToken, (req, res) => {
-    return UpdateStatus(req, res);
+Router.patch('/updatestatus/:id', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await UpdateStatus(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/getemployeetracking', (req, res) => {
-    return TrackEmployee(req, res);
+Router.get('/employeetracking', async (request, response) => {
+    try {
+        let { error, message, data } = await TrackEmployee(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/dashboard', (req, res) => {
-    return Dashboard(req, res);
+Router.get('/dashboard', async (request, response) => {
+    try {
+        let { error, message, data } = await Dashboard(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.delete('/delete/:id', VerifyToken, (req, res) => {
-    return DeleteJobManagement(req, res);
+Router.delete('/delete/:id', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await DeleteJobManagement(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/graphdata', VerifyToken, (req, res) => {
-    return Graphdata(req, res);
+Router.post('/graph', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Graphdata(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/generatepdf', (req, res) => {
-    return Generatepdf(req, res);
+Router.get('/generatepdf', async (req, res) => {
+    try {
+        let { error, message, data } = await Generatepdf(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/mobile/joblist', VerifyToken, (req, res) => {
-    return MobileJoblist(req, res);
+Router.get('/mobile/joblist', VerifyToken, async (req, res) => {
+    try {
+        let { error, message, data } = await MobileJoblist(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 400);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
 module.exports = Router;

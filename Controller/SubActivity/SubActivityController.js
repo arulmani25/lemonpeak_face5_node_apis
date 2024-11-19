@@ -3,12 +3,10 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const mongoose = require('mongoose');
 const Activity = require('../../Models/ActivityModel');
 const SidebarItem = require('../../Models/SidebarModel');
 const Subactivity = require('../../Models/SubactivityModel');
 const CheckListModel = require('../../Models/ChecklistModel');
-const ObjectId = mongoose.Types.ObjectId;
 
 // Create a new subactivity
 const SubActivityController = {
@@ -18,76 +16,64 @@ const SubActivityController = {
      * @param {*} res
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (req, res) => {
         try {
             if (!req.body.title || !req.body.description || !req.body.parentActivity) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'Title, description, and parentActivity are required fields',
-                    Data: {},
-                    Code: 400
-                });
+                return {
+                    error: true,
+                    message: 'Title, description, and parentActivity are required fields',
+                    data: {}
+                };
             }
-            console.log('======req.body', req.body);
             const activityData = await Activity.findOne({
                 _id: req.body.parentActivity
             });
             if (!activityData) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'Parent activity not exists',
-                    Data: {},
-                    Code: 400
-                });
+                return {
+                    error: true,
+                    message: 'Parent activity not exists',
+                    data: {}
+                };
             }
-
-            // check checklist exist under the main-activity
 
             const isExist = await CheckListModel.findOne({
-                main_activity_id: new ObjectId(activityData._id)
+                activity_id: activityData.activity_id
             });
             if (isExist) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'Delete Activity Checklist To Create Sub-Activity',
-                    Data: {},
-                    Code: 400
-                });
+                return {
+                    error: true,
+                    message: 'Delete Activity Checklist To Create Sub-Activity',
+                    data: {}
+                };
             }
             const newSubactivity = await Subactivity.create(req.body);
-            console.log('=======newSubactivity', newSubactivity);
             const parentActivitySidebarItem = await SidebarItem.findOne({
                 link: `/activities/${req.body.parentActivity}`
             });
 
             if (!parentActivitySidebarItem) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Parent activity sidebar item not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Parent activity sidebar item not found',
+                    data: {}
+                };
             }
-            console.log('======parentActivitySidebarItem', parentActivitySidebarItem);
             parentActivitySidebarItem.subItems.push({
                 title: newSubactivity.title,
                 icon: 'icon',
                 link: `/subactivities/${newSubactivity._id}`
             });
-            return res.status(201).json({
-                Status: 'Status',
-                Message: 'Sub Activity Created Successfully',
-                Data: {},
-                Code: 201
-            });
+            return {
+                error: false,
+                message: 'Sub Activity Created Successfully',
+                data: {}
+            };
         } catch (error) {
-            console.log('========error', error);
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -98,37 +84,32 @@ const SubActivityController = {
      */
     Update: async (req, res) => {
         try {
-            // Basic input validation
             if (!req.body.title || !req.body.description || !req.body.parentActivity) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'Title, description, and parentActivity are required fields',
-                    Data: {},
-                    Code: 400
-                });
+                return {
+                    error: true,
+                    message: 'Title, description, and parentActivity are required fields',
+                    data: {}
+                };
             }
             const updatedSubactivity = await Subactivity.findByIdAndUpdate(req.body.id, req.body, { new: true });
             if (!updatedSubactivity) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Subactivity not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Subactivity not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Subactivity updated successfully',
-                Data: updatedSubactivity,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Subactivity updated successfully',
+                data: updatedSubactivity
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -165,19 +146,17 @@ const SubActivityController = {
                     }
                 }
             ]);
-            res.json({
-                Status: 'Success',
-                Message: 'Subactivities fetched successfully',
-                Data: subactivities,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Subactivities fetched successfully',
+                data: subactivities
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -190,26 +169,23 @@ const SubActivityController = {
         try {
             const subactivity = await Subactivity.findById(req.params.id);
             if (!subactivity) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Subactivity not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Subactivity not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Subactivity fetched successfully',
-                Data: subactivity,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Subactivity fetched successfully',
+                data: subactivity
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -222,26 +198,23 @@ const SubActivityController = {
         try {
             const deletedSubactivity = await Subactivity.findByIdAndDelete(req.params.id);
             if (!deletedSubactivity) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Subactivity not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    return: true,
+                    message: 'Subactivity not found',
+                    date: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Subactivity deleted successfully',
-                Data: deletedSubactivity,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Subactivity deleted successfully',
+                data: deletedSubactivity
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: 'Failed',
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     }
 };

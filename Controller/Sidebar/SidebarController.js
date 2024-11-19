@@ -15,23 +15,20 @@ const SidebarController = {
      * @param {*} req
      * @param {*} res
      */
-    create: async (req, res) => {
+    Create: async (requestData) => {
         try {
-            const newSidebarItem = await SidebarModel.create(req.body);
-            res.status(201).json({
-                Status: 'Success',
-                Message: 'Sidebar item created successfully',
-                Data: newSidebarItem,
-                Code: 201
-            });
+            const newSidebarItem = await SidebarModel.create(requestData);
+            return {
+                error: false,
+                message: 'Sidebar item created successfully',
+                data: newSidebarItem
+            };
         } catch (error) {
-            console.log('=======error', error);
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -45,7 +42,7 @@ const SidebarController = {
                 name: req.loggedUser.user_type
             });
             const getConfigs = await AccessConfigModel.findOne({
-                role: new mongoose.Types.ObjectId(getIdByRole._id)
+                user_type_id: getIdByRole.user_type_id
             });
 
             const sideBarItems = [];
@@ -58,19 +55,17 @@ const SidebarController = {
             const sidebarItems = await SidebarModel.find({
                 title: { $in: sideBarItems }
             });
-            res.json({
-                Status: 'Success',
-                Message: 'Sidebar items fetched successfully',
-                Data: sidebarItems,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Sidebar items fetched successfully',
+                data: sidebarItems
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -83,26 +78,23 @@ const SidebarController = {
         try {
             const sidebarItem = await SidebarModel.find();
             if (!sidebarItem) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Sidebar item not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Sidebar item not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Sidebar item fetched successfully',
-                Data: sidebarItem,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Sidebar item fetched successfully',
+                data: sidebarItem
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -115,26 +107,23 @@ const SidebarController = {
         try {
             const sidebarItem = await SidebarModel.findById(req.params.id);
             if (!sidebarItem) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Sidebar item not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Sidebar item not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Sidebar item fetched successfully',
-                Data: sidebarItem,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Sidebar item fetched successfully',
+                data: sidebarItem
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -147,26 +136,23 @@ const SidebarController = {
         try {
             const updatedSidebarItem = await SidebarModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!updatedSidebarItem) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Sidebar item not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Sidebar item not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Sidebar item updated successfully',
-                Data: updatedSidebarItem,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Sidebar item updated successfully',
+                data: updatedSidebarItem
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -175,30 +161,27 @@ const SidebarController = {
      * @param {*} res
      * @returns
      */
-    DeleteSidebarItem: async (req, res) => {
+    Delete: async (req, res) => {
         try {
             const deletedSidebarItem = await SidebarModel.findByIdAndDelete(req.params.id);
             if (!deletedSidebarItem) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Sidebar item not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Sidebar item not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Sidebar item deleted successfully',
-                Data: deletedSidebarItem,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Sidebar item deleted successfully',
+                data: deletedSidebarItem
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };
