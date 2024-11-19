@@ -11,7 +11,7 @@ const SubAdminAccessController = {
      * @param {*} req
      * @param {*} res
      */
-    create: async function (req, res) {
+    Create: async function (req, res) {
         const isExist = await subAdminAccessModel.findOne({
             user_name: req.body.user_name
         });
@@ -32,29 +32,26 @@ const SubAdminAccessController = {
                         last_login: new Date()
                     },
                     function (err, user) {
-                        res.json({
-                            Status: 'Success',
-                            Message: 'Sub Admin Access Added successfully',
-                            Data: user,
-                            Code: 200
-                        });
+                        return {
+                            error: false,
+                            message: 'Sub Admin Access Added successfully',
+                            data: user
+                        };
                     }
                 );
-            } catch (e) {
-                res.json({
-                    Status: 'Failed',
-                    Message: 'Internal Server Error',
-                    Data: {},
-                    Code: 500
-                });
+            } catch (error) {
+                return {
+                    error: true,
+                    message: error.message,
+                    data: {}
+                };
             }
         } else {
-            res.json({
-                Status: 'Access Already Created',
-                Message: 'Access Already Created',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: 'Access Already Created',
+                data: {}
+            };
         }
     },
     /**
@@ -64,12 +61,11 @@ const SubAdminAccessController = {
      */
     Details: async (req, res) => {
         await subAdminAccessModel.findOne({ _id: req.body._id }, function (err, StateList) {
-            res.json({
-                Status: 'Success',
-                Message: 'State List',
-                Data: StateList,
-                Code: 200
-            });
+            return {
+                error: alse,
+                message: 'State List',
+                data: StateList
+            };
         });
     },
     /**
@@ -80,19 +76,17 @@ const SubAdminAccessController = {
     Login: async (req, res) => {
         await subAdminAccessModel.findOne({ username: req.body.username, password: req.body.password }, (err, data) => {
             if (data !== null) {
-                res.json({
-                    Status: 'Success',
-                    Message: 'Sub Admin Logged In Successfully',
-                    Data: data,
-                    Code: 200
-                });
+                return {
+                    error: false,
+                    message: 'Sub Admin Logged In Successfully',
+                    data: data
+                };
             } else {
-                res.json({
-                    Status: 'Failed',
-                    Message: 'Account Not Found',
-                    Data: {},
-                    Code: 200
-                });
+                return {
+                    error: true,
+                    message: 'Account Not Found',
+                    data: {}
+                };
             }
         });
     },
@@ -104,12 +98,11 @@ const SubAdminAccessController = {
     Deletes: function (req, res) {
         subAdminAccessModel.remove({}, function (err, user) {
             if (err) return res.status(500).send('There was a problem deleting the sub admin access.');
-            res.json({
-                Status: 'Success',
-                Message: 'subAdminAccess Deleted',
-                Data: {},
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'subAdminAccess Deleted',
+                data: {}
+            };
         });
     },
     /**
@@ -119,12 +112,11 @@ const SubAdminAccessController = {
      */
     List: async (req, res) => {
         await subAdminAccessModel.find({}, (err, data) => {
-            res.json({
-                Status: 'Success',
-                Message: 'List Retrived SuccessFully',
-                Data: data,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'List Retrived SuccessFully',
+                data: data
+            };
         });
     },
     /**
@@ -133,20 +125,18 @@ const SubAdminAccessController = {
      * @param {*} res
      */
     Update: async (req, res) => {
-        await subAdminAccessModel.findByIdAndUpdate(req.body._id, req.body, { new: true }, (err, UpdatedDetails) => {
-            if (err)
-                return res.json({
-                    Status: 'Failed',
-                    Message: 'Internal Server Error',
-                    Data: {},
-                    Code: 500
-                });
-            res.json({
-                Status: 'Success',
-                Message: 'Record Updated Successfully',
-                Data: UpdatedDetails,
-                Code: 200
-            });
+        await subAdminAccessModel.findByIdAndUpdate(req.body._id, req.body, { new: true }, (error, UpdatedDetails) => {
+            if (error)
+                return {
+                    error: true,
+                    message: error.message,
+                    data: {}
+                };
+            return {
+                error: false,
+                message: 'Record Updated Successfully',
+                data: UpdatedDetails
+            };
         });
     },
     /**
@@ -155,20 +145,18 @@ const SubAdminAccessController = {
      * @param {*} res
      */
     Delete: async (req, res) => {
-        await subAdminAccessModel.findByIdAndRemove(req.body._id, function (err, user) {
-            if (err)
-                return res.json({
-                    Status: 'Failed',
-                    Message: 'Internal Server Error',
-                    Data: {},
-                    Code: 500
-                });
-            res.json({
-                Status: 'Success',
-                Message: 'SubAdmin Deleted successfully',
-                Data: {},
-                Code: 200
-            });
+        await subAdminAccessModel.findByIdAndRemove(req.body._id, function (error, user) {
+            if (error)
+                return {
+                    error: true,
+                    message: error.message,
+                    data: {}
+                };
+            return {
+                error: false,
+                message: 'SubAdmin Deleted successfully',
+                data: {}
+            };
         });
     }
 };

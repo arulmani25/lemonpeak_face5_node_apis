@@ -15,10 +15,8 @@ const SubactivitySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    parentActivity: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity',
-        required: true
+    activity_id: {
+        type: String
     }
 });
 SubactivitySchema.plugin(timestamps);
@@ -26,8 +24,6 @@ SubactivitySchema.plugin(timestamps);
 SubactivitySchema.pre('save', async function (next) {
     const Subactivity = this.constructor;
     const activityId = this.parentActivity;
-    console.log('========activityId', activityId);
-    console.log('========Subactivity', Subactivity);
     const activity = await mongoose.model('Activity').findById(activityId);
     if (!activity) {
         throw new Error('Invalid parent activity for subactivity');

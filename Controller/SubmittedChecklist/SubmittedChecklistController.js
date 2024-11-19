@@ -3,8 +3,6 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const SubmittedChecklistModel = require('../../Models/SubmitChecklistModel');
 const jobManagementModel = require('../../Models/JobManagementModel');
 const { jobStatus } = require('../../Helpers');
@@ -16,39 +14,35 @@ const JobManagementController = {
      * @param {*} res
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (req) => {
         try {
             const existingJob = await SubmittedChecklistModel.findOne({
-                job_id: new ObjectId(req.body.job_id)
+                job_id: req?.body?.job_id
             });
             if (existingJob) {
-                return res.status(409).json({
-                    Status: 'Failed',
-                    Message: 'checklist Already Submitted',
-                    Data: {},
-                    Code: 409
-                });
+                return {
+                    error: true,
+                    message: 'checklist Already Submitted',
+                    data: {}
+                };
             }
 
             const submittedChecklist = await SubmittedChecklistModel.create(req.body);
             const updateJobStatus = await jobManagementModel.findOneAndUpdate(
-                { _id: new ObjectId(req.body.jobId) },
+                { job_id: req?.body?.jobId },
                 { $set: { jobStatus: jobStatus.JOB_COMPLETED } }
             );
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'CheckList Submitted successfully',
-                Data: submittedChecklist,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'CheckList Submitted successfully',
+                data: submittedChecklist
+            };
         } catch (error) {
-            console.error('Error Submitting checklist:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -60,20 +54,17 @@ const JobManagementController = {
     List: async (req, res) => {
         try {
             const submittedChecklist = await SubmittedChecklistModel.find({});
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Checklist retrieved successfully',
-                Data: submittedChecklist,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Checklist retrieved successfully',
+                data: submittedChecklist
+            };
         } catch (error) {
-            console.error('Error fetching user types:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -119,29 +110,25 @@ const JobManagementController = {
         try {
             const updatedUserType = await SubmittedChecklistModel.findByIdAndUpdate(req.params.id, req.body, {
                 new: true
-            }); // Return updated document
+            });
             if (!updatedUserType) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Checklist not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'checklist updated successfully',
-                Data: updatedUserType,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist updated successfully',
+                data: updatedUserType
+            };
         } catch (error) {
-            console.error('Error updating checklist:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -154,28 +141,24 @@ const JobManagementController = {
         try {
             const deletedCheklist = await SubmittedChecklistModel.findByIdAndDelete(req.params.id);
             if (!deletedCheklist) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'checklist not found',
+                    data: {}
+                };
             }
 
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'checklist deleted successfully',
-                Data: deletedCheklist,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist deleted successfully',
+                data: deletedCheklist
+            };
         } catch (error) {
-            console.error('Error deleting checklist:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -184,7 +167,7 @@ const JobManagementController = {
      * @param {*} res
      * @returns
      */
-    SubmittedjobList: async (req, res) => {
+    Submittedjob: async (req, res) => {
         try {
             const jobList = await jobManagementModel.find(
                 {
@@ -194,20 +177,17 @@ const JobManagementController = {
                 { sort: { createdAt: -1 } }
             );
 
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Submitted Job List retrieved successfully',
-                Data: jobList,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Submitted Job List retrieved successfully',
+                data: jobList
+            };
         } catch (error) {
-            console.error('Error fetching checklist:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };

@@ -6,7 +6,7 @@ const ClientSchema = new mongoose.Schema({
     firstName: { type: String },
     lastName: { type: String },
     email: { type: String, required: true },
-    siteDetails: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SiteManagement' }],
+    site_id: { type: String },
     address: {
         fullAddress: String,
         street: String,
@@ -36,7 +36,7 @@ const ClientSchema = new mongoose.Schema({
     gstMedia: { type: String },
     isActive: {
         type: Boolean,
-        default: true // By default, a new record is active
+        default: true
     }
 });
 ClientSchema.plugin(timestamps);

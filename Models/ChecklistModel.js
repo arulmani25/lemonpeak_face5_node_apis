@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const timestamps = require('mongoose-timestamp');
-const objectId = mongoose.Schema.ObjectId;
 
 const CheckListSchema = new mongoose.Schema({
     checklist_id: { type: String },
@@ -14,10 +13,10 @@ const CheckListSchema = new mongoose.Schema({
     field_update_reason: { type: String },
     date_of_create: { type: Date },
     date_of_update: { type: Date },
-    created_by: { type: objectId, ref: 'User' },
-    updated_by: { type: objectId, ref: 'User' },
-    main_activity_id: { type: objectId, required: true, ref: 'Activity' },
-    sub_activity_id: { type: objectId, ref: 'Subactivity' },
+    // created_by: { type: objectId, ref: 'User' },
+    // updated_by: { type: objectId, ref: 'User' },
+    activity_id: { type: String, required: true },
+    sub_activity_id: { type: String },
     delete_status: { type: Boolean, default: false },
     field_required: { type: Boolean },
     check_list_type: {

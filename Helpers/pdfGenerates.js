@@ -1,20 +1,21 @@
 const path = require('path');
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs');
+const puppeteer = require('puppeteer');
 const mongoose = require('mongoose');
 const SubmittedCheckListModel = require('../Models/SubmitChecklistModel');
 const ActivityModel = require('../Models/ActivityModel');
 const SiteManagementModel = require('../Models/SiteManagementModel');
 
 const generatePdf = async (payload) => {
-    const spacing = 100; // Define spacing directly within the function
-
     try {
-        const fetch = await import('node-fetch').then((mod) => mod.default);
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: 'new'
+        });
+        const page = await browser.newPage();
 
-        // Fetch data from database
         const checklist = await SubmittedCheckListModel.aggregate([
-            { $match: { job_id: new mongoose.Types.ObjectId(payload?.job_id) } },
+            { $match: { job_details_id: payload?.job_details_id } },
             {
                 $lookup: {
                     from: 'jobdetails',
@@ -30,312 +31,195 @@ const generatePdf = async (payload) => {
                 }
             }
         ]);
-
         if (!checklist || checklist.length === 0) {
-            throw new Error('Checklist not found or empty');
+            return { success: false, message: 'Checklist not found or empty' };
         }
 
         const siteInfo = await SiteManagementModel.findOne({
-            _id: new mongoose.Types.ObjectId(checklist[0].jobInfo.siteId)
+            site_id: checklist[0].jobInfo.site_id
         });
 
         if (!siteInfo) {
-            throw new Error('Site information not found');
+            return { success: false, message: 'Site information not found' };
         }
 
         const activityInfo = await ActivityModel.findOne({
-            _id: new mongoose.Types.ObjectId(checklist[0].jobInfo.activityId)
+            activity_id: checklist[0].jobInfo.activity_id
         });
-
         if (!activityInfo) {
-            throw new Error('Activity information not found');
+            return { success: false, message: 'Activity information not found' };
         }
 
-        // Create a new PDF document
-        const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([595, 842]); // A4 size in points
-        const { width, height } = page.getSize();
+        let additionalRowHTML = '';
+        if (Array.isArray(checklist[0].submittedData)) {
+            checklist[0].submittedData.forEach((record, index) => {
+                let fieldValue = record.field_value;
+                // Check if the field_name is "File" or "sign" and convert the URL to an image tag
+                if (record.field_type === 'File' || record.field_type === 'Signature') {
+                    fieldValue = `<img src="${record.field_value}" style="width:100px" alt="${record.field_name}">`;
+                }
 
-        // Embed standard font
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontSize = 12;
-
-        // Fetch and embed the image
-        const imageUrl = 'http://18.61.82.213:3000/api/Face5_Logo2-2 text.png';
-        const response = await fetch(imageUrl);
-        const imageBytes = await response.arrayBuffer();
-        const image = await pdfDoc.embedPng(imageBytes);
-
-        // Draw the image on the left side
-        const imageDims = image.scale(0.1); // Adjust scale as needed
-        const imageX = 50;
-        const imageY = height - imageDims.height - 50;
-        page.drawImage(image, {
-            x: imageX,
-            y: imageY,
-            width: imageDims.width,
-            height: imageDims.height
-        });
-
-        // Draw the address on the right side occupying only 50% of the page width
-        const addressText = `${siteInfo?.address?.fullAddress}`;
-        const addressFontSize = 14;
-        const maxTextWidth = width * 0.4; // 50% of the page width
-        const textWidth = font.widthOfTextAtSize(addressText, addressFontSize);
-        const addressX = width - maxTextWidth - 60;
-        const addressY = height - 60;
-
-        page.drawText(addressText, {
-            x: addressX,
-            y: addressY,
-            size: addressFontSize,
-            font,
-            color: rgb(0, 0, 0),
-            maxWidth: maxTextWidth // Limit the text width to 50% of the page
-        });
-
-        // Draw the title in the center below the image and address
-        const titleText = activityInfo.title;
-        const titleFontSize = 26;
-        const titleWidth = font.widthOfTextAtSize(titleText, titleFontSize);
-        const titleX = (width - titleWidth) / 2;
-        const titleY = imageY - 75; // Adjust as needed to provide spacing
-        page.drawText(titleText, {
-            x: titleX,
-            y: titleY,
-            size: titleFontSize,
-            font,
-            color: rgb(0, 0, 0)
-        });
-
-        // Draw the task details section
-        const detailFontSize = 12;
-        const detailFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-        const taskIdText = `Task ID: ${checklist[0].jobInfo.jobId}`;
-        const completionDateText = `Completion Date: ${checklist[0].createdAt.toISOString().split('T')[0]}`;
-        const taskTitleText = `Task Title: ${checklist[0].jobInfo.jobTitle}`;
-
-        // Define positions
-        const margin = 50;
-        const detailStartY = titleY - 50; // Adjust starting position
-
-        // Draw Task ID and Completion Date
-        page.drawText(taskIdText, {
-            x: margin,
-            y: detailStartY,
-            size: detailFontSize,
-            font: detailFont,
-            color: rgb(0, 0, 0)
-        });
-        page.drawText(completionDateText, {
-            x: width - margin - detailFont.widthOfTextAtSize(completionDateText, detailFontSize),
-            y: detailStartY,
-            size: detailFontSize,
-            font: detailFont,
-            color: rgb(0, 0, 0)
-        });
-
-        // Draw Task Title
-        const taskTitleY = detailStartY - 30; // Adjust spacing
-        page.drawText(taskTitleText, {
-            x: margin,
-            y: taskTitleY,
-            size: detailFontSize,
-            font: detailFont,
-            color: rgb(0, 0, 0)
-        });
-
-        // Define table properties
-        const headerHeight = 50; // Height of the header row
-        const rowHeight = 25; // Height of each row
-        const colWidths = [80, 300, 100]; // Column widths (adjust as necessary)
-        const tableWidth = colWidths.reduce((a, b) => a + b, 0); // Total table width
-
-        // Calculate table top position based on titles and image
-        const tableTop = taskTitleY - rowHeight - headerHeight - 20; // Adjust as needed for space above table
-
-        // Draw table header
-        const headerY = tableTop + headerHeight;
-        page.drawRectangle({
-            x: 50,
-            y: headerY - headerHeight,
-            width: tableWidth,
-            height: headerHeight,
-            color: rgb(0.8, 0.8, 0.8) // Light gray background for header
-        });
-
-        page.drawText('S.No', {
-            x: 50 + 5, // X position with padding
-            y: headerY - headerHeight / 2 - fontSize / 2, // Centered vertically within header row
-            size: fontSize,
-            font,
-            color: rgb(0, 0, 0),
-            maxWidth: colWidths[0], // Limit text width to column width
-            textAlign: 'center' // Center-align text
-        });
-        page.drawText('Activities to be Carried Out', {
-            x: 50 + colWidths[0] + 5, // X position with padding
-            y: headerY - headerHeight / 2 - fontSize / 2,
-            size: fontSize,
-            font,
-            color: rgb(0, 0, 0),
-            maxWidth: colWidths[1], // Limit text width to column width
-            textAlign: 'left' // Left-align text
-        });
-        page.drawText('Action', {
-            x: 50 + colWidths[0] + colWidths[1] + 5, // X position with padding
-            y: headerY - headerHeight / 2 - fontSize / 2,
-            size: fontSize,
-            font,
-            color: rgb(0, 0, 0),
-            maxWidth: colWidths[2], // Limit text width to column width
-            textAlign: 'center' // Center-align text
-        });
-
-        // Draw table lines
-        let currentY = tableTop;
-        page.drawLine({
-            start: { x: 50, y: currentY },
-            end: { x: 50 + tableWidth, y: currentY },
-            color: rgb(0, 0, 0), // Black line color
-            thickness: 1
-        });
-
-        currentY -= rowHeight;
-
-        checklist[0].submittedData.forEach((record, index) => {
-            page.drawRectangle({
-                x: 50,
-                y: currentY,
-                width: tableWidth,
-                height: rowHeight,
-                color: rgb(1, 1, 1), // White background for rows
-                thickness: 1
+                additionalRowHTML += `
+                  <tr>
+                      <td style="text-align:center">${index + 1}.</td>
+                      <td style="text-align:center">${record.field_name}</td>
+                      <td style="text-align:center">${fieldValue}</td>
+                  </tr>
+            `;
             });
+        } else {
+            return { success: false, message: 'Data is not an array' };
+        }
+        // Construct HTML content with data
+        const htmlContent = `<!DOCTYPE html>
+            <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>PDF Example</title>
+                            <!-- Include Bootstrap CSS -->
+                            <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet">
+                            <style>
+                                body {
+                                    margin: 0;
+                                    font-family: Arial, sans-serif;
+                                    color: black;
+                                }
+                                .container {
+                                    width: 100%;
+                                    padding: 30px;  /* This should match the PDF margins */
+                                    box-sizing: border-box;
+                                }
+                                th, td {
+                                    font-size: 13px;
+                                    text-align: left;
+                                    border-color: black !important;
+                                }
+                                th {
+                                    font-size: 15px;
+                                    text-align: center;
+                                }
+                                .invoice {
+                                    background: #fff;
+                                    width: 100%;
+                                }
+                                .logo {
+                                    width: 2.5cm;
+                                }
+                                .text-heading {
+                                    font-size: 15px;
+                                }
+                                .text {
+                                    font-size: 13px;
+                                }
+                                #theadrow {
+                                    background-color: white;
+                                    color: black;
+                                }
+                                .bottom-page {
+                                    font-size: 13px;
+                                }
+                            </style>
+                </head>
+                <body>
+                <div class="container">
+                    <div class="invoice">
+                        <div class="row">
+                            <div class="col-3">
+                                <img class="img-fluid" width="150px" src="http://18.61.82.213:3000/api/Face5_Logo2-2 text.png" alt="Face5 Logo">
+                            </div>
+                        <div class="col-9 d-flex align-items-center">
+                            <div class="row">
+                                <div class="col-12 text-right">
+                                    <h6 style="font-size: 18px; margin-bottom: 0;">${siteInfo?.address?.fullAddress}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div><br>
 
-            page.drawText(`${index + 1}`, {
-                x: 50 + 5, // X position with padding
-                y: currentY + rowHeight / 2 - fontSize / 2, // Centered vertically within row
-                size: fontSize,
-                font,
-                color: rgb(0, 0, 0),
-                maxWidth: colWidths[0], // Limit text width to column width
-                textAlign: 'center' // Center-align text
-            });
-            page.drawText(record.field_name, {
-                x: 50 + colWidths[0] + 5, // X position with padding
-                y: currentY + rowHeight / 2 - fontSize / 2,
-                size: fontSize,
-                font,
-                color: rgb(0, 0, 0),
-                maxWidth: colWidths[1], // Limit text width to column width
-                textAlign: 'left' // Left-align text
-            });
-            page.drawText(record.field_value, {
-                x: 50 + colWidths[0] + colWidths[1] + 5, // X position with padding
-                y: currentY + rowHeight / 2 - fontSize / 2,
-                size: fontSize,
-                font,
-                color: rgb(0, 0, 0),
-                maxWidth: colWidths[2], // Limit text width to column width
-                textAlign: 'center' // Center-align text
-            });
+                    <div class="col-12" style="padding:10px; border:1px solid black;">
+                        <h6 style="font-size: 28px; text-align: center; margin-top: 14px;">${activityInfo.title}</h6> 
+                    </div><br>
 
-            page.drawLine({
-                start: { x: 50, y: currentY },
-                end: { x: 50 + tableWidth, y: currentY },
-                color: rgb(0, 0, 0), // Black line color
-                thickness: 1
-            });
+                    <div class="row mt-4">
+                        <div class="col">
+                            <p class='text-heading'><strong>Task ID:</strong>${checklist[0].jobInfo.jobId}</p>
+                        </div>
+                        <div class="col text-right">
+                            <p class='text-heading'><strong>Completion Date:</strong>${checklist[0].createdAt.toISOString().split('T')[0]}</p> 
+                        </div>
+                    </div>
+                </div>
 
-            currentY -= rowHeight;
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p class='text-heading'><strong>Task Title:</strong>${checklist[0].jobInfo.jobTitle}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr id="theadrow">
+                                <th style="text-align:center">S.No</th>
+                                <th style="text-align:center">ACTIVITIES TO BE CARRIED OUT</th>
+                                <th style="text-align:center">ACTION</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${additionalRowHTML}
+                        </tbody>
+                    </table>
+                </div><br>
+
+                <footer>
+                    <div class="row">
+                        <div class="col text-left">
+                            <p class="bottom-page">${checklist[0].jobInfo.techName}<br>Technician Name</p>
+                        </div>
+                        <div class="col text-right">
+                            <img class="img-fluid" width="40px" src="${payload.sign_url}" alt="Signature"><br>
+                            Signature<br>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </body>
+</html>`;
+
+        // Generate PDF from HTML content
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+        // Define the upload directory and the PDF filename
+        const uploadDir = path.join(__dirname, '../Pdfupload');
+        const pdfFilename = path.join(uploadDir, 'output.pdf');
+
+        // Check if the directory exists, if not create it
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        // Generate the PDF
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '30px',
+                bottom: '30px',
+                left: '30px',
+                right: '30px'
+            },
+            path: pdfFilename
         });
 
-        // Draw column lines
-        let xOffset = 50;
-        colWidths.forEach((width) => {
-            page.drawLine({
-                start: { x: xOffset, y: tableTop + headerHeight },
-                end: { x: xOffset, y: currentY + rowHeight },
-                color: rgb(0, 0, 0), // Black line color
-                thickness: 1
-            });
-            xOffset += width;
-        });
-
-        // Draw the right side end line
-        page.drawLine({
-            start: { x: xOffset, y: tableTop + headerHeight },
-            end: { x: xOffset, y: currentY + rowHeight },
-            color: rgb(0, 0, 0), // Black line color for the right side end
-            thickness: 1
-        });
-
-        // Draw the bottom line of the table
-        page.drawLine({
-            start: { x: 50, y: currentY + rowHeight },
-            end: { x: 50 + tableWidth, y: currentY + rowHeight },
-            color: rgb(0, 0, 0), // Black line color
-            thickness: 1
-        });
-
-        let value = height - tableTop - spacing;
-        // Draw tech name at the top-left corner with dynamic spacing
-        const techNameText = `Technician: ${checklist[0].jobInfo.techName}`;
-        const techNameFontSize = 14;
-        page.drawText(techNameText, {
-            x: 50, // X position
-            y: value - 150, // Y position from the top of the page (adjusted by spacing)
-            size: techNameFontSize,
-            font,
-            color: rgb(0, 0, 0)
-        });
-
-        // Fetch and embed the signature image
-        const signImageUrl = payload.sign_url;
-        const signResponse = await fetch(signImageUrl);
-        const signImageBytes = await signResponse.arrayBuffer();
-        const signImage = await pdfDoc.embedPng(signImageBytes);
-
-        // Draw the signature image in the bottom right corner
-        const signImageScale = 0.1; // Adjust scale as needed
-        const signImageDims = signImage.scale(signImageScale);
-        const signImageX = width - signImageDims.width - 50; // 50 points from the right edge
-        const signImageY = 50; // 50 points from the bottom edge
-
-        page.drawImage(signImage, {
-            x: signImageX,
-            y: signImageY + 30,
-            width: signImageDims.width,
-            height: signImageDims.height
-        });
-
-        // Draw the "sign" text below the signature image
-        const signText = 'Signature ';
-        const signFontSize = 20;
-        const signTextWidth = font.widthOfTextAtSize(signText, signFontSize);
-        const signTextX = signImageX + (signImageDims.width - signTextWidth) / 2; // Center the text under the image
-        const signTextY = signImageY - signFontSize - 1; // 5 points below the image
-
-        page.drawText(signText, {
-            x: signTextX,
-            y: signTextY + 20,
-            size: signFontSize,
-            font,
-            color: rgb(0, 0, 0)
-        });
-
-        // const outputPath = path.resolve('/home/developer/Documents/arulmani/resource/face5_node_api/Source/', 'output.pdf');
-        const pdfBytes = await pdfDoc.save();
-        const outputPath = path.resolve(__dirname, 'output.pdf');
-        fs.writeFileSync(outputPath, pdfBytes);
-
-        console.log('PDF generated successfully:', outputPath);
-        return outputPath;
+        // Close the browser
+        await browser.close();
+        return { success: true, message: 'PDF generated successfully', path: pdfFilename };
     } catch (err) {
-        console.error('Error processing request:', err);
-        throw err;
+        console.log(1, err.message);
+        return { success: false, message: err.message };
     }
 };
 

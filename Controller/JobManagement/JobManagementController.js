@@ -3,8 +3,6 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const moment = require('moment');
 const JobManagementModel = require('../../Models/JobManagementModel');
 const { jobStatus } = require('../../Helpers');
@@ -18,39 +16,35 @@ const JobManagementController = {
      * @param {*} res
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (req, res) => {
         try {
             if (!req.body.siteId || !req?.body?.activityId) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'ActivityId and  SiteId are required fields',
-                    Data: {},
-                    Code: 400
-                });
+                return {
+                    error: true,
+                    message: 'ActivityId and  SiteId are required fields',
+                    data: {}
+                };
             }
             const jobId = moment().format('YYYYMMDDHHmmss');
             req.body.jobId = `JB${jobId}`;
             const getUser = await User.findOne({
-                _id: new ObjectId(req?.body?.techName)
+                user_id: req?.body?.userId
             });
             req.body.techName = getUser?.username;
             req.body.techNumber = getUser?.phoneNumber;
             req.body.is_master = true;
             const newJob = await JobManagementModel.create(req?.body);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Job created successfully',
-                Data: newJob,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Job created successfully',
+                data: newJob
+            };
         } catch (error) {
-            console.log('=====error', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -83,19 +77,19 @@ const JobManagementController = {
 
             const jobs = await JobManagementModel.aggregate([
                 {
-                    $match: clientId ? { clientId: new ObjectId(clientId) } : {}
+                    $match: clientId ? { client_id: clientId } : {}
                 },
                 {
-                    $match: siteId ? { siteId: new ObjectId(siteId) } : {}
+                    $match: siteId ? { site_id: siteId } : {}
                 },
                 {
-                    $match: activityId ? { activityId: new ObjectId(activityId) } : {}
+                    $match: activityId ? { activity_id: activityId } : {}
                 },
                 {
                     $match: subActivityId
                         ? {
-                              activityId: new ObjectId(activityId),
-                              subActivityId: new ObjectId(subActivityId)
+                              activity_id: activityId,
+                              sub_activity_id: subActivityId
                           }
                         : {}
                 },
@@ -168,20 +162,17 @@ const JobManagementController = {
                     }
                 }
             ]);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Jobs retrieved successfully',
-                Data: jobs,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Jobs retrieved successfully',
+                data: jobs
+            };
         } catch (error) {
-            console.error('Error fetching Jobs:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -190,31 +181,27 @@ const JobManagementController = {
      * @param {*} res
      * @returns
      */
-    Details: async (req, res) => {
+    Details: async (id, res) => {
         try {
-            const job = await JobManagementModel.findById(req.params.id);
+            const job = await JobManagementModel.findById(id);
             if (!job) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Job not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Job not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Job retrieved successfully',
-                Data: job,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Job retrieved successfully',
+                data: job
+            };
         } catch (error) {
-            console.error('Error fetching job:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -223,32 +210,29 @@ const JobManagementController = {
      * @param {*} res
      * @returns
      */
-    Update: async (req, res) => {
+    Update: async (req) => {
         try {
             const job = await JobManagementModel.findByIdAndUpdate(req.body.id, req.body, {
                 new: true
             });
             if (!job) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'job not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'job not found',
+                    data: {}
+                };
             }
-            return res.json({
-                Status: 'Success',
-                Message: 'Job updated successfully',
-                Data: job,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Job updated successfully',
+                data: job
+            };
         } catch (error) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -264,12 +248,11 @@ const JobManagementController = {
             // Basic input validation
             const job = await JobManagementModel.findById(req?.params?.id);
             if (!job) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'job not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'job not found',
+                    data: {}
+                };
             }
             const jobStatusUpdate = await JobManagementModel.findOneAndUpdate(
                 {
@@ -287,11 +270,6 @@ const JobManagementController = {
             jobStatusUpdate.markModified('jobStatus');
             await jobStatusUpdate.save();
 
-            // jobStatusUpdate.jobStatus = req.body.jobStatus;
-            // delete jobStatusUpdate._id;
-
-            // createJob = await JobManagementModel.create({ ...jobStatusUpdate });
-
             createLocationTracking = await JobLocationTracking.create({
                 jobId: job?.jobId,
                 techNumber: job?.techNumber,
@@ -302,19 +280,17 @@ const JobManagementController = {
                 ativityType: req?.body?.ativityType,
                 status: req?.body?.jobStatus
             });
-            return res.json({
-                Status: 'Success',
-                Message: 'Job updated successfully',
-                Data: {},
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Job updated successfully',
+                data: {}
+            };
         } catch (error) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -325,28 +301,25 @@ const JobManagementController = {
      */
     DeleteJobManagement: async (req, res) => {
         try {
-            const deletedJob = await JobManagementModel.findByIdAndDelete(req.params.id);
+            const deletedJob = await JobManagementModel.findByIdAndDelete(req?.params?.id);
             if (!deletedJob) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Job not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Job not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Job deleted successfully',
-                Data: deletedJob,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Job deleted successfully',
+                data: deletedJob
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -355,10 +328,10 @@ const JobManagementController = {
      * @param {*} res
      * @returns
      */
-    TrackEmployee: async (req, res) => {
+    TrackEmployee: async (req) => {
         try {
-            const startDate = moment(req.query.fromDate);
-            const endDate = moment(req.query.toDate);
+            const startDate = moment(req?.query?.fromDate);
+            const endDate = moment(req?.query?.toDate);
             const data = await JobLocationTracking.find({
                 techNumber: req.query.techNumber,
                 createdAt: {
@@ -371,7 +344,7 @@ const JobManagementController = {
                 responseData.push({
                     isActive: iterator.isActive,
                     _id: iterator._id,
-                    job_no: iterator.jobId,
+                    job_no: iterator.job_id,
                     user_mobile_no: iterator.techNumber,
                     location_text: iterator.location,
                     loc_lat: iterator.lat,
@@ -384,20 +357,17 @@ const JobManagementController = {
                     __v: iterator.__v
                 });
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Employee Tracking retrieved successfully',
-                Data: responseData,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Employee Tracking retrieved successfully',
+                data: responseData
+            };
         } catch (error) {
-            console.error('Error fetching list:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -415,14 +385,14 @@ const JobManagementController = {
                 {
                     $match: req.body.siteId
                         ? {
-                              siteId: new ObjectId(req.body.siteId)
+                              site_id: req.body.siteId
                           }
                         : {}
                 },
                 {
                     $match: req.body.activityId
                         ? {
-                              activityId: new ObjectId(req.body.activityId)
+                              activity_id: req.body.activityId
                           }
                         : {}
                 },
@@ -466,19 +436,17 @@ const JobManagementController = {
                 }
             });
 
-            return res.json({
-                Status: 'Success',
-                Message: 'Dashboard Data retrived successfully',
-                Data: obj,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Dashboard Data retrived successfully',
+                data: obj
+            };
         } catch (error) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -533,9 +501,9 @@ const JobManagementController = {
                 for (const iterator of barChartLabels) {
                     const customDate = moment(iterator);
 
-                    const data = await jobManagementModel.aggregate([
+                    const data = await JobManagementModel.aggregate([
                         {
-                            $match: req.body.siteId ? { siteId: new ObjectId(req.body.siteId) } : {}
+                            $match: req.body.siteId ? { site_id: req.body.siteId } : {}
                         },
                         {
                             $match: {
@@ -640,7 +608,7 @@ const JobManagementController = {
                     const customDate = moment(iterator);
                     const data = await jobManagementModel.aggregate([
                         {
-                            $match: req.body.siteId ? { siteId: new ObjectId(req.body.siteId) } : {}
+                            $match: req.body.siteId ? { site_id: req.body.siteId } : {}
                         },
                         {
                             $match: {
@@ -732,19 +700,17 @@ const JobManagementController = {
                 ];
             }
 
-            return res.json({
-                Status: 'Success',
-                Message: 'Graph Data retrived successfully',
-                Data: { barChartLabels, barChart_data },
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Graph Data retrived successfully',
+                data: { barChartLabels, barChart_data }
+            };
         } catch (error) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -757,12 +723,11 @@ const JobManagementController = {
         try {
             const pdfFilename = await generatePdf(req?.body);
             if (pdfFilename === 'false') {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'No Jobs Completed.Please Complete Jobs To Generate Report',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'No Jobs Completed.Please Complete Jobs To Generate Report',
+                    data: {}
+                };
             }
             res.set({
                 'Content-Type': 'application/pdf',
@@ -770,13 +735,17 @@ const JobManagementController = {
                 'Content-Disposition': `attachment; filename=${new Date().toISOString().split('T')[0]}.pdf`
             });
             res.sendFile(pdfFilename);
-        } catch (err) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: false,
+                message: 'pdf file',
+                data: pdfFilename
+            };
+        } catch (error) {
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -790,10 +759,7 @@ const JobManagementController = {
             const jobList = await JobManagementModel.aggregate([
                 {
                     $match: {
-                        $or: [
-                            { activityId: new ObjectId(req.query.activityId) },
-                            { subActivityId: new ObjectId(req.query.activityId) }
-                        ]
+                        $or: [{ activity_id: req.query.activityId }, { sub_activity_id: req.query.activityId }]
                     }
                 },
                 {
@@ -812,20 +778,17 @@ const JobManagementController = {
                             : { jobStatus: { $ne: jobStatus.JOB_COMPLETED } }
                 }
             ]);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Jobs retrieved successfully',
-                Data: jobList,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Jobs retrieved successfully',
+                data: jobList
+            };
         } catch (error) {
-            console.error('Error fetching Jobs:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                debuggerata: {}
+            };
         }
     }
 };

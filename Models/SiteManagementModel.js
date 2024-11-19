@@ -3,10 +3,8 @@ const timestamps = require('mongoose-timestamp');
 
 const SiteSchema = new mongoose.Schema({
     site_id: { type: String },
-    clientId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ClientManagement',
-        required: true
+    client_id: {
+        type: String
     },
     siteName: { type: String, required: true },
     siteCode: { type: String, unique: true },

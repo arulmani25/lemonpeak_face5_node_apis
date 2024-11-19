@@ -2,16 +2,10 @@ const Express = require('express');
 const Router = Express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const CheckListModel = require('../../Models/ChecklistModel');
 const { isEmpty, getNanoId, dateFinder } = require('../../Helpers/Utils');
 const { findOneActivity } = require('../../Repositary/activityrepositary');
-const {
-    createChecklist,
-    findChecklist,
-    deleteChecklist
-} = require('../../Repositary/Checklistrepositary');
+const { createChecklist, findChecklist, deleteChecklist } = require('../../Repositary/Checklistrepositary');
 
 const CheckList = {
     /**
@@ -222,26 +216,23 @@ const CheckList = {
         try {
             const updatedChecklist = await CheckListModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!updatedChecklist) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'checklist not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'checklist updated successfully',
-                Data: updatedChecklist,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist updated successfully',
+                data: updatedChecklist
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -282,32 +273,26 @@ const CheckList = {
     GetMobileChecklist: async (req, res) => {
         try {
             const checklistById = await CheckListModel.find({
-                $or: [
-                    { main_activity_id: new ObjectId(req.query.activityId) },
-                    { sub_activity_id: new ObjectId(req.query.activityId) }
-                ]
+                $or: [{ activity_id: req?.query?.activityId }, { sub_activity_id: req?.query?.subactivityId }]
             });
             if (!checklistById) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'checklist not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'checklist fetched successfully',
-                Data: checklistById,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist fetched successfully',
+                data: checklistById
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };
