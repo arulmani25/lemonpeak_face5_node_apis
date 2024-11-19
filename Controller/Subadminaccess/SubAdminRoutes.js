@@ -1,34 +1,90 @@
 const Express = require('express');
 const Router = Express.Router();
-const { create, Login, Details, List, Update, Deletes, Delete } = require('./SubAdminAccessController');
+const { Create, Login, Details, List, Update, Deletes, Delete } = require('./SubAdminAccessController');
 const { VerifyToken } = require('../../Helpers/JWSToken');
 
-Router.post('/create', VerifyToken, (req, res) => {
-    return create(req, res);
+Router.post('/create', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Create(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/subadmin/login', (req, res) => {
-    return Login(req, res);
+Router.post('/subadmin/login', async (request, response) => {
+    try {
+        let { error, message, data } = await Login(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.get('/getlist', VerifyToken, (req, res) => {
-    return List(req, res);
+Router.get('/list', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await List(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/getdetailById', VerifyToken, (req, res) => {
-    return Details(req, res);
+Router.get('/details', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Details(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.delete('/deletes', VerifyToken, (req, res) => {
-    return Deletes(req, res);
+Router.delete('/deletes', VerifyToken, async (req, res) => {
+    try {
+        let { error, message, data } = await Deletes(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/delete', VerifyToken, (req, res) => {
-    return Delete(req, res);
+Router.delete('/delete', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Delete(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
-Router.post('/edit', VerifyToken, (req, res) => {
-    return Update(req, res);
+Router.patch('/update', VerifyToken, async (request, response) => {
+    try {
+        let { error, message, data } = await Update(request);
+        if (!isEmpty(data) && error === false) {
+            return sendSuccessData(response, message, data);
+        }
+        return sendFailureMessage(response, message, 422);
+    } catch (error) {
+        return sendFailureMessage(response, error.message, 500);
+    }
 });
 
 module.exports = Router;

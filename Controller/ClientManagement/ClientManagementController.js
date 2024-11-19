@@ -1,43 +1,71 @@
 const Express = require('express');
 const Router = Express.Router();
 const bodyParser = require('body-parser');
+const { getNanoId, isEmpty } = require('../../Helpers/Utils');
 Router.use(bodyParser.urlencoded({ extended: false }));
-Router.use(bodyParser.json());
-const ClientManagementLocal = '../../Models/ClientManagementModel';
-const ClientManagementModel = require(ClientManagementLocal);
+const ClientManagementModel = require('../../Models/ClientManagementModel');
+const {
+    createClientManagement,
+    findOneClientManagement,
+    deleteClientManagement
+} = require('../../Repositary/clientManagementrepositary');
 
 const ClientManagement = {
     /**
      * create client
-     * @param {*} req
-     * @param {*} res
+     * @param {*} requestData
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (requestData) => {
         try {
-            if (!req.body.email) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'email is required field',
-                    Data: {},
-                    Code: 400
-                });
+            if (!requestData?.email) {
+                return {
+                    error: true,
+                    message: 'Email is required field',
+                    data: {}
+                };
             }
-            const newClient = await ClientManagementModel.create(req.body);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Client created successfully',
-                Data: newClient,
-                Code: 200
-            });
+            let requestObject = {
+                client_id: getNanoId(),
+                firstName: requestData?.firstName ?? '',
+                lastName: requestData?.lastName ?? '',
+                email: requestData?.email ?? '',
+                site_id: requestData?.site_id ?? '',
+                address: {
+                    fullAddress: requestData?.address?.fullAddress ?? '',
+                    street: requestData?.address?.street ?? '',
+                    city: requestData?.address?.city ?? '',
+                    state: requestData?.address?.state ?? '',
+                    postalCode: requestData?.address?.postalCode ?? '',
+                    country: requestData?.address?.country ?? '',
+                    lng: requestData?.address?.lng ?? '',
+                    lat: requestData?.address?.lat ?? ''
+                },
+                phoneNumber: requestData?.phoneNumber ?? '',
+                countryCode: requestData?.countryCode ?? '',
+                gender: requestData?.gender ?? '',
+                profileImage: requestData?.profileImage ?? '',
+                accountNumber: requestData?.accountNumber ?? 0,
+                GSTIN: requestData?.GSTIN ?? '',
+                legalName: requestData?.legalName ?? '',
+                aadhar: requestData?.aadhar ?? 0,
+                panCard: requestData?.panCard ?? '',
+                bankMedia: requestData?.bankMedia ?? '',
+                panCardMedia: requestData?.panCardMedia ?? '',
+                gstMedia: requestData?.gstMedia ?? ''
+            };
+            const newClient = await createClientManagement(requestObject);
+            return {
+                error: false,
+                message: 'Client created successfully',
+                data: newClient
+            };
         } catch (error) {
-            console.log('=====error', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -46,15 +74,13 @@ const ClientManagement = {
      * @param {*} res
      * @returns
      */
-    List: async (req, res) => {
+    List: async (request) => {
         try {
-            const { searchKey, skip, limit, sortkey, sortOrder, status } = req.query;
+            const { searchKey, skip, limit, sortkey, sortOrder, status } = request?.query;
 
             const sort = {
                 [sortkey ? sortkey : 'createdAt']: !sortOrder || sortOrder === 'DESC' ? -1 : 1
             };
-
-            const searchRegex = new RegExp(['^.*', searchKey, '.*$'].join(''), 'i');
 
             const clientList = await ClientManagementModel.aggregate([
                 {
@@ -77,53 +103,45 @@ const ClientManagement = {
                     }
                 }
             ]);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Clients retrieved successfully',
-                Data: clientList,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Clients retrieved successfully',
+                data: clientList
+            };
         } catch (error) {
-            console.error('Error fetching Clients:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
-     * details of client
-     * @param {*} req
-     * @param {*} res
+     * client details
+     * @param {*} clientId
      * @returns
      */
-    Details: async (req, res) => {
+    Details: async (clientId) => {
         try {
-            const clientInfo = await ClientManagementModel.findById(req.params.id);
-            if (!job) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
-                });
+            const getClient = await findOneClientManagement({ client_id: clientId });
+            if (isEmpty(getClient)) {
+                return {
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Client retrieved successfully',
-                Data: clientInfo,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Client retrieved successfully',
+                data: getClient
+            };
         } catch (error) {
-            console.error('Error fetching Client:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -132,32 +150,63 @@ const ClientManagement = {
      * @param {*} res
      * @returns
      */
-    Update: async (req, res) => {
+    Update: async (request) => {
         try {
-            const updateClient = await ClientManagementModel.findByIdAndUpdate(req.body.id, req.body, {
-                new: true
-            });
-            if (!updateClient) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
-                });
+            if (isEmpty(request?.client_id)) {
+                return {
+                    error: true,
+                    message: 'Client_id is not empty',
+                    data: {}
+                };
             }
-            return res.json({
-                Status: 'Success',
-                Message: 'Client updated successfully',
-                Data: updateClient,
-                Code: 200
-            });
+            let getClient = await findOneClientManagement({ client_id: request?.client_id });
+            if (isEmpty(getClient)) {
+                return {
+                    error: true,
+                    message: 'client is not found',
+                    data: {}
+                };
+            }
+            getClient.firstName = request?.firstName ?? getClient?.firstName;
+            getClient.lastName = request?.lastName ?? getClient?.lastName;
+            getClient.email = request?.email ?? getClient?.email;
+            getClient.address.fullAddress = request?.address?.fullAddress ?? getClient?.address?.fullAddress;
+            getClient.address.street = request?.address?.street ?? getClient?.address?.street;
+            getClient.address.city = request?.address?.city ?? getClient?.address?.city;
+            getClient.address.state = request?.address?.state ?? getClient?.address?.state;
+            getClient.address.postalCode = request?.address?.postalCode ?? getClient?.address?.postalCode;
+            getClient.address.country = request?.address?.country ?? getClient?.address?.country;
+
+            getClient.markModified([
+                'firstName',
+                'lastName',
+                'email',
+                'address.fullAddress',
+                'address.street',
+                'address.city',
+                'address.state',
+                'address.postalCode',
+                'address.country'
+            ]);
+            let result = await getClient.save();
+            if (!result) {
+                return {
+                    error: true,
+                    message: 'Client is not updated',
+                    data: {}
+                };
+            }
+            return {
+                error: false,
+                message: 'Client updated successfully',
+                data: result
+            };
         } catch (error) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -166,36 +215,36 @@ const ClientManagement = {
      * @param {*} res
      * @returns
      */
-    UpdateStatus: async (req, res) => {
+    UpdateStatus: async (query, clientID) => {
         try {
-            // Basic input validation
-            const clientStatus = await ClientManagementModel.findById(req.params.id);
-            if (!clientStatus) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
-                });
+            const getClient = await findOneClientManagement({ client_id: clientID });
+            if (isEmpty(getClient)) {
+                return {
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
+                };
             }
-
-            const clientStatusUpdate = await ClientManagementModel.findOneAndUpdate(
-                { _id: req.params.id },
-                { $set: { status: req.body.status } }
-            );
-
-            return res.json({
-                Status: 'Success',
-                Message: 'Client Status updated successfully',
-                Data: {},
-                Code: 200
-            });
+            getClient.Status = query?.status ?? getClient?.Status;
+            getClient.markModified('status');
+            let result = await getClient.save();
+            if (!result) {
+                return {
+                    error: true,
+                    message: 'Client is not updated',
+                    data: {}
+                };
+            }
+            return {
+                error: false,
+                message: 'Client updated successfully',
+                data: result
+            };
         } catch (error) {
             return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
+                error: true,
+                message: error.message,
+                data: {}
             });
         }
     },
@@ -211,10 +260,9 @@ const ClientManagement = {
             const getclient = await ClientManagementModel.findById(req.params.id);
             if (!getclient) {
                 return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
                 });
             }
 
@@ -224,17 +272,15 @@ const ClientManagement = {
             );
 
             return res.json({
-                Status: 'Success',
-                Message: 'Client Site Linked successfully',
-                Data: {},
-                Code: 200
+                error: false,
+                message: 'Client Site Linked successfully',
+                data: {}
             });
         } catch (error) {
             return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
+                error: true,
+                message: error.message,
+                data: {}
             });
         }
     },
@@ -250,10 +296,9 @@ const ClientManagement = {
             const getclient = await ClientManagementModel.findById(req.params.id);
             if (!getclient) {
                 return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
                 });
             }
 
@@ -261,52 +306,52 @@ const ClientManagement = {
                 { _id: req.params.id },
                 { $pull: { siteDetails: req.body.siteId } }
             );
-
+            if (isEmpty(clientSiteUnLink)) {
+                return res.json({
+                    error: true,
+                    message: "Client site doesn't unLinked",
+                    data: {}
+                });
+            }
             return res.json({
-                Status: 'Success',
-                Message: 'Client Site UnLinked successfully',
-                Data: {},
-                Code: 200
+                error: false,
+                message: 'Client Site UnLinked successfully',
+                data: {}
             });
         } catch (error) {
             return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
+                error: true,
+                message: error.message,
+                data: {}
             });
         }
     },
     /**
-     * delete_client_management
-     * @param {*} req
-     * @param {*} res
+     * delete client
+     * @param {*} clientId
      * @returns
      */
-    DeleteClientManagement: async (req, res) => {
+    Delete: async (clientId) => {
         try {
-            const removeClient = await ClientManagementModel.findByIdAndDelete(req.params.id);
+            const removeClient = await deleteClientManagement({ client_id: clientId });
             if (!removeClient) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Client not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Client not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Client deleted successfully',
-                Data: removeClient,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Client deleted successfully',
+                data: {}
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };

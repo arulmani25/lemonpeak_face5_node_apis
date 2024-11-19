@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
     lastName: { type: String, required: true },
     fcm_token: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
-    user_type_id: { type: String, ref: 'UserType' }
+    user_type_id: { type: String }
 });
 UserSchema.plugin(timestamps);
 const User = mongoose.model('User', UserSchema);

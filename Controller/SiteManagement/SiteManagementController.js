@@ -3,8 +3,6 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const SiteManagementModel = require('../../Models/SiteManagementModel');
 
 const SiteManagementController = {
@@ -14,31 +12,27 @@ const SiteManagementController = {
      * @param {*} res
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (requestValue, res) => {
         try {
-            if (!req.body.clientId || !req.body.siteName) {
-                return res.status(400).json({
-                    Status: 'Failed',
-                    Message: 'clientId is required field',
-                    Data: {},
-                    Code: 400
-                });
+            if (!requestValue?.body?.clientId || !requestValue?.body?.siteName) {
+                return {
+                    error: true,
+                    message: 'clientId is required field',
+                    data: {}
+                };
             }
-            const newSite = await SiteManagementModel.create(req.body);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Site created successfully',
-                Data: newSite,
-                Code: 200
-            });
+            const newSite = await SiteManagementModel.create(requestValue?.body);
+            return {
+                error: false,
+                message: 'Site created successfully',
+                data: newSite
+            };
         } catch (error) {
-            console.log('=====error', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -59,7 +53,7 @@ const SiteManagementController = {
 
             const siteList = await SiteManagementModel.aggregate([
                 {
-                    $match: clientId ? { clientId: new ObjectId(clientId) } : {}
+                    $match: clientId ? { client_id: clientId } : {}
                 },
                 {
                     $match: searchKey
@@ -78,20 +72,17 @@ const SiteManagementController = {
                     }
                 }
             ]);
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Sites retrieved successfully',
-                Data: siteList,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Sites retrieved successfully',
+                data: siteList
+            };
         } catch (error) {
-            console.error('Error fetching Sites:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -104,27 +95,23 @@ const SiteManagementController = {
         try {
             const siteInfo = await SiteManagementModel.findById(req.params.id);
             if (!siteInfo) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Site not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Site not found',
+                    data: {}
+                };
             }
-            return res.status(200).json({
-                Status: 'Success',
-                Message: 'Site retrieved successfully',
-                Data: siteInfo,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Site retrieved successfully',
+                data: siteInfo
+            };
         } catch (error) {
-            console.error('Error fetching Site:', error);
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: 'Failed',
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -137,26 +124,23 @@ const SiteManagementController = {
         try {
             const removeSite = await SiteManagementModel.findByIdAndDelete(req.params.id);
             if (!removeSite) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Site not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Site not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'Site deleted successfully',
-                Data: removeSite,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Site deleted successfully',
+                data: removeSite
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -171,26 +155,23 @@ const SiteManagementController = {
                 new: true
             });
             if (!updateSite) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'Site not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'Site not found',
+                    data: {}
+                };
             }
-            return res.json({
-                Status: 'Success',
-                Message: 'Site updated successfully',
-                Data: updateSite,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'Site updated successfully',
+                data: updateSite
+            };
         } catch (error) {
-            return res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };

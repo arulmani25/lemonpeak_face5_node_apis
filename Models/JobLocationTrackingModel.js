@@ -12,7 +12,7 @@ const JobLocationSchema = new mongoose.Schema({
     status: { type: String },
     isActive: {
         type: Boolean,
-        default: true // By default, a new record is active
+        default: true
     }
 });
 JobLocationSchema.plugin(timestamps);

@@ -3,8 +3,6 @@ const Router = express.Router();
 const bodyParser = require('body-parser');
 Router.use(bodyParser.urlencoded({ extended: false }));
 Router.use(bodyParser.json());
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const tempChecklistModel = require('../../Models/TempChecklistModel');
 
 const TempChecklistController = {
@@ -14,43 +12,39 @@ const TempChecklistController = {
      * @param {*} res
      * @returns
      */
-    create: async (req, res) => {
+    Create: async (request) => {
         try {
             let record;
-            const payload = req.body;
+            const payload = request?.body;
             const isJobExists = await tempChecklistModel.findOne({
-                job_id: new ObjectId(payload.job_id) // replace job id
+                job_deteils_id: payload.job_deteils_id
             });
             if (isJobExists) {
                 record = await tempChecklistModel.findOneAndUpdate(
-                    { job_id: new ObjectId(isJobExists.job_id) },
+                    { job_deteils_id: isJobExists.job_id },
                     { data_store: [...payload.data_store] }
                 );
-                return res.status(201).json({
-                    Status: 'Success',
-                    Message: 'temp checklist stored successfully',
-                    Data: record,
-                    Code: 201
-                });
+                return {
+                    error: false,
+                    message: 'temp checklist stored successfully',
+                    data: record
+                };
             } else {
                 record = await tempChecklistModel.create({
                     ...payload
                 });
-                return res.status(201).json({
-                    Status: 'Success',
-                    Message: 'temp checklist stored successfully',
-                    Data: record,
-                    Code: 201
-                });
+                return {
+                    error: false,
+                    message: 'temp checklist stored successfully',
+                    data: record
+                };
             }
         } catch (error) {
-            console.log('=======error', error);
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -61,19 +55,17 @@ const TempChecklistController = {
     List: async (req, res) => {
         try {
             const checkLists = await tempChecklistModel.find();
-            res.json({
-                Status: 'Success',
-                Message: 'checklist fetched successfully',
-                Data: checkLists,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist fetched successfully',
+                data: checkLists
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -82,32 +74,29 @@ const TempChecklistController = {
      * @param {*} res
      * @returns
      */
-    Details: async (req, res) => {
+    Details: async (req) => {
         try {
             const checklistById = await tempChecklistModel.findOne({
-                job_id: new ObjectId(req.params.id) //replace with job id
+                job_details_id: req?.params?.id
             });
             if (!checklistById) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'temp checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'temp checklist not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'temp checklist fetched successfully',
-                Data: checklistById,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'temp checklist fetched successfully',
+                data: checklistById
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     },
     /**
@@ -120,26 +109,23 @@ const TempChecklistController = {
         try {
             const updatedChecklist = await tempChecklistModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!updatedChecklist) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'checklist not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'checklist updated successfully',
-                Data: updatedChecklist,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist updated successfully',
+                data: updatedChecklist
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: 'Failed',
+                message: 'Internal Server Error',
+                data: {}
+            };
         }
     },
     /**
@@ -152,26 +138,23 @@ const TempChecklistController = {
         try {
             const deleteChecklist = await tempChecklistModel.findByIdAndDelete(req.params.id);
             if (!deleteChecklist) {
-                return res.status(404).json({
-                    Status: 'Failed',
-                    Message: 'checklist not found',
-                    Data: {},
-                    Code: 404
-                });
+                return {
+                    error: true,
+                    message: 'checklist not found',
+                    data: {}
+                };
             }
-            res.json({
-                Status: 'Success',
-                Message: 'checklist deleted successfully',
-                Data: deleteChecklist,
-                Code: 200
-            });
+            return {
+                error: false,
+                message: 'checklist deleted successfully',
+                data: deleteChecklist
+            };
         } catch (error) {
-            res.status(500).json({
-                Status: 'Failed',
-                Message: 'Internal Server Error',
-                Data: {},
-                Code: 500
-            });
+            return {
+                error: true,
+                message: error.message,
+                data: {}
+            };
         }
     }
 };

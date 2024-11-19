@@ -1,9 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { isEmpty } = require('../Helpers/Utils');
 const { findOneUser } = require('../Repositary/Userrepositary');
-const userModel = require('../Models/UserModel');
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 
 let JWSToken = {
     /**
